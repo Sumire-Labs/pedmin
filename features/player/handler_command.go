@@ -3,6 +3,7 @@ package player
 import (
 	"github.com/disgoorg/disgo/discord"
 	"github.com/disgoorg/disgo/events"
+	"github.com/disgoorg/disgolink/v3/lavalink"
 )
 
 func (p *Player) HandleCommand(e *events.ApplicationCommandInteractionCreate) {
@@ -20,6 +21,11 @@ func (p *Player) HandleCommand(e *events.ApplicationCommandInteractionCreate) {
 	p.deleteTrackedMessage(*guildID)
 
 	player := p.lavalink.Player(*guildID)
+	if player.Volume() != p.defaultVolume {
+		ctx, cancel := lavalinkCtx()
+		_ = player.Update(ctx, lavalink.WithVolume(p.defaultVolume))
+		cancel()
+	}
 	queue := p.queues.Get(*guildID)
 	ui := BuildPlayerUI(player, queue)
 

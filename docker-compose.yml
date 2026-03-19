@@ -1,24 +1,36 @@
 services:
   lavalink:
-    image: ghcr.io/lavalink-devs/lavalink:4-alpine
+    image: ghcr.io/lavalink-devs/lavalink:e141cd9
     container_name: pedmin-lavalink
     restart: unless-stopped
     volumes:
-      - ./lavalink/application.yml:/opt/Lavalink/application.yml
+      - ./lavalink/application.yml:/opt/Lavalink/application.yml:ro
+      - ./lavalink/plugins:/opt/Lavalink/plugins
     ports:
       - "2333:2333"
     environment:
       - _JAVA_OPTIONS=-Xmx512m
+    dns:
+      - 8.8.8.8
+      - 8.8.4.4
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "--header=Authorization: youshallnotpass", "http://localhost:2333/version"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   bot:
     build: .
     container_name: pedmin-bot
     restart: unless-stopped
     depends_on:
-      - lavalink
+      lavalink:
+        condition: service_healthy
     env_file:
       - .env
-    environment:
-      - LAVALINK_HOST=lavalink:2333
+    dns:
+      - 8.8.8.8
+      - 8.8.4.4
     volumes:
       - ./data:/app/data
+      - ./config.cue:/app/config.cue:ro

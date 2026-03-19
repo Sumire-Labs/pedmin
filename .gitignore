@@ -28,6 +28,9 @@ go.work.sum
 .env
 .claude
 
+# CUE config (may contain passwords)
+config.cue
+
 # Runtime data
 data/
 

@@ -3,6 +3,7 @@ package player
 import (
 	"log/slog"
 	"sync"
+	"time"
 
 	disgobot "github.com/disgoorg/disgo/bot"
 	"github.com/disgoorg/disgo/discord"
@@ -20,19 +21,24 @@ type trackedMessage struct {
 }
 
 type Player struct {
-	lavalink disgolink.Client
-	client   *disgobot.Client
-	queues   *QueueManager
-	messages sync.Map // map[snowflake.ID]trackedMessage
-	logger   *slog.Logger
+	lavalink         disgolink.Client
+	client           *disgobot.Client
+	queues           *QueueManager
+	messages         sync.Map // map[snowflake.ID]trackedMessage
+	defaultVolume    int
+	autoLeaveTimeout time.Duration
+	leaveTimers      sync.Map // map[snowflake.ID]*time.Timer
+	logger           *slog.Logger
 }
 
-func New(link disgolink.Client, client *disgobot.Client, logger *slog.Logger) *Player {
+func New(link disgolink.Client, client *disgobot.Client, defaultVolume int, autoLeaveTimeout time.Duration, logger *slog.Logger) *Player {
 	return &Player{
-		lavalink: link,
-		client:   client,
-		queues:   NewQueueManager(),
-		logger:   logger,
+		lavalink:         link,
+		client:           client,
+		queues:           NewQueueManager(),
+		defaultVolume:    defaultVolume,
+		autoLeaveTimeout: autoLeaveTimeout,
+		logger:           logger,
 	}
 }
 

@@ -49,6 +49,7 @@ func New(cfg *config.Config, guildStore store.GuildStore, logger *slog.Logger) (
 		disgobot.WithEventListenerFunc(b.onModalSubmit),
 		disgobot.WithEventListenerFunc(b.onVoiceStateUpdate),
 		disgobot.WithEventListenerFunc(b.onVoiceServerUpdate),
+		disgobot.WithEventListenerFunc(b.onMemberVoiceStateUpdate),
 	)
 	if err != nil {
 		return nil, err

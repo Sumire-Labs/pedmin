@@ -20,7 +20,7 @@ func (b *Bot) startPresenceUpdater(ctx context.Context) {
 
 	b.updatePresence(ctx, proc)
 
-	ticker := time.NewTicker(30 * time.Second)
+	ticker := time.NewTicker(b.Cfg.PresenceInterval)
 	defer ticker.Stop()
 
 	for {

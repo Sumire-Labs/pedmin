@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"log/slog"
 	"os"
 	"os/signal"
@@ -16,13 +17,13 @@ import (
 )
 
 func main() {
-	logger := slog.New(slog.NewTextHandler(os.Stdout, &slog.HandlerOptions{Level: slog.LevelInfo}))
-
 	cfg, err := config.Load()
 	if err != nil {
-		logger.Error("failed to load config", slog.Any("error", err))
+		fmt.Fprintf(os.Stderr, "failed to load config: %v\n", err)
 		os.Exit(1)
 	}
+
+	logger := slog.New(slog.NewTextHandler(os.Stdout, &slog.HandlerOptions{Level: cfg.LogLevel}))
 
 	guildStore, err := store.NewSQLiteStore(cfg.DBPath)
 	if err != nil {
@@ -43,7 +44,7 @@ func main() {
 	avatarModule := avatar.New(logger)
 	b.Register(avatarModule)
 
-	playerModule := player.New(b.Lavalink, b.Client, logger)
+	playerModule := player.New(b.Lavalink, b.Client, cfg.DefaultVolume, cfg.AutoLeaveTimeout, logger)
 	player.SetupListeners(b.Lavalink, playerModule)
 	b.Register(playerModule)
 

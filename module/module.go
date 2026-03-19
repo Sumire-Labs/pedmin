@@ -22,3 +22,9 @@ type Module interface {
 	SettingsPanel(guildID snowflake.ID) []discord.LayoutComponent
 	HandleSettingsComponent(e *events.ComponentInteractionCreate)
 }
+
+// VoiceStateListener is an optional interface that modules can implement
+// to receive voice state updates for non-bot users.
+type VoiceStateListener interface {
+	OnVoiceStateUpdate(guildID, channelID, userID snowflake.ID)
+}

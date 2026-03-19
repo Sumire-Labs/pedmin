@@ -2,22 +2,33 @@ package config
 
 import (
 	"fmt"
+	"log/slog"
 	"os"
-	"path/filepath"
+	"time"
 
+	"cuelang.org/go/cue"
+	"cuelang.org/go/cue/cuecontext"
 	"github.com/disgoorg/snowflake/v2"
 )
 
 type Config struct {
-	Token            string
-	AppID            snowflake.ID
+	// env (secrets)
+	Token string
+	AppID snowflake.ID
+
+	// CUE (app settings)
 	LavalinkHost     string
 	LavalinkPassword string
 	DataDir          string
 	DBPath           string
+	DefaultVolume    int
+	AutoLeaveTimeout time.Duration
+	PresenceInterval time.Duration
+	LogLevel         slog.Level
 }
 
 func Load() (*Config, error) {
+	// 1. env secrets
 	token := os.Getenv("DISCORD_TOKEN")
 	if token == "" {
 		return nil, fmt.Errorf("DISCORD_TOKEN is required")
@@ -32,32 +43,97 @@ func Load() (*Config, error) {
 		return nil, fmt.Errorf("invalid DISCORD_APP_ID: %w", err)
 	}
 
-	lavalinkHost := os.Getenv("LAVALINK_HOST")
-	if lavalinkHost == "" {
-		lavalinkHost = "lavalink:2333"
+	// 2. CUE config
+	configPath := os.Getenv("CONFIG_PATH")
+	if configPath == "" {
+		configPath = "./config.cue"
 	}
 
-	lavalinkPassword := os.Getenv("LAVALINK_PASSWORD")
-	if lavalinkPassword == "" {
-		lavalinkPassword = "youshallnotpass"
+	data, err := os.ReadFile(configPath)
+	if err != nil {
+		return nil, fmt.Errorf("failed to read config file %s: %w", configPath, err)
 	}
 
-	dataDir := os.Getenv("DATA_DIR")
-	if dataDir == "" {
-		dataDir = "./data"
+	ctx := cuecontext.New()
+	value := ctx.CompileBytes(data)
+	if err := value.Validate(cue.Concrete(true)); err != nil {
+		return nil, fmt.Errorf("config validation failed: %w", err)
 	}
 
-	dbPath := os.Getenv("DB_PATH")
-	if dbPath == "" {
-		dbPath = filepath.Join(dataDir, "pedmin.db")
+	cfg := &Config{
+		Token: token,
+		AppID: appID,
 	}
 
-	return &Config{
-		Token:            token,
-		AppID:            appID,
-		LavalinkHost:     lavalinkHost,
-		LavalinkPassword: lavalinkPassword,
-		DataDir:          dataDir,
-		DBPath:           dbPath,
-	}, nil
+	if err := lookupString(value, "lavalink.host", &cfg.LavalinkHost); err != nil {
+		return nil, err
+	}
+	if err := lookupString(value, "lavalink.password", &cfg.LavalinkPassword); err != nil {
+		return nil, err
+	}
+	if err := lookupString(value, "storage.dataDir", &cfg.DataDir); err != nil {
+		return nil, err
+	}
+	if err := lookupString(value, "storage.dbPath", &cfg.DBPath); err != nil {
+		return nil, err
+	}
+
+	var defaultVolume int
+	if err := lookupInt(value, "player.defaultVolume", &defaultVolume); err != nil {
+		return nil, err
+	}
+	cfg.DefaultVolume = defaultVolume
+
+	var autoLeaveSeconds int
+	if err := lookupInt(value, "player.autoLeaveTimeout", &autoLeaveSeconds); err != nil {
+		return nil, err
+	}
+	cfg.AutoLeaveTimeout = time.Duration(autoLeaveSeconds) * time.Second
+
+	var presenceSeconds int
+	if err := lookupInt(value, "presence.interval", &presenceSeconds); err != nil {
+		return nil, err
+	}
+	cfg.PresenceInterval = time.Duration(presenceSeconds) * time.Second
+
+	var logLevelStr string
+	if err := lookupString(value, "logLevel", &logLevelStr); err != nil {
+		return nil, err
+	}
+	cfg.LogLevel = parseSlogLevel(logLevelStr)
+
+	return cfg, nil
+}
+
+func lookupString(v cue.Value, path string, dst *string) error {
+	val := v.LookupPath(cue.ParsePath(path))
+	s, err := val.String()
+	if err != nil {
+		return fmt.Errorf("config %s: %w", path, err)
+	}
+	*dst = s
+	return nil
+}
+
+func lookupInt(v cue.Value, path string, dst *int) error {
+	val := v.LookupPath(cue.ParsePath(path))
+	n, err := val.Int64()
+	if err != nil {
+		return fmt.Errorf("config %s: %w", path, err)
+	}
+	*dst = int(n)
+	return nil
+}
+
+func parseSlogLevel(s string) slog.Level {
+	switch s {
+	case "debug":
+		return slog.LevelDebug
+	case "warn":
+		return slog.LevelWarn
+	case "error":
+		return slog.LevelError
+	default:
+		return slog.LevelInfo
+	}
 }
