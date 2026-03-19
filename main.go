@@ -11,6 +11,7 @@ import (
 	"github.com/s12kuma01/pedmin/bot"
 	"github.com/s12kuma01/pedmin/config"
 	"github.com/s12kuma01/pedmin/features/avatar"
+	"github.com/s12kuma01/pedmin/features/fuckfetch"
 	"github.com/s12kuma01/pedmin/features/ping"
 	"github.com/s12kuma01/pedmin/features/player"
 	"github.com/s12kuma01/pedmin/features/settings"
@@ -47,6 +48,9 @@ func main() {
 
 	pingModule := ping.New(logger)
 	b.Register(pingModule)
+
+	fuckfetchModule := fuckfetch.New(logger)
+	b.Register(fuckfetchModule)
 
 	playerModule := player.New(b.Lavalink, b.Client, cfg.DefaultVolume, cfg.AutoLeaveTimeout, logger)
 	player.SetupListeners(b.Lavalink, playerModule)
