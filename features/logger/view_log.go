@@ -145,5 +145,5 @@ func logMessage(color int, title, body string) discord.MessageCreate {
 			discord.NewSmallSeparator(),
 			discord.NewTextDisplay(body),
 		).WithAccentColor(color),
-	)
+	).WithAllowedMentions(&discord.AllowedMentions{})
 }
