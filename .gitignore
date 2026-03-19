@@ -26,6 +26,10 @@ go.work.sum
 
 # env file
 .env
+.claude
+
+# Runtime data
+data/
 
 # Editor/IDE
 # .idea/
