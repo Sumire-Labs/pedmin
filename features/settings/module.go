@@ -30,8 +30,8 @@ func New(bot Bot, logger *slog.Logger) *Settings {
 func (s *Settings) Info() module.Info {
 	return module.Info{
 		ID:          ModuleID,
-		Name:        "Settings",
-		Description: "Server settings management panel",
+		Name:        "設定",
+		Description: "サーバー設定管理パネル",
 		AlwaysOn:    true,
 	}
 }
@@ -41,7 +41,7 @@ func (s *Settings) Commands() []discord.ApplicationCommandCreate {
 	return []discord.ApplicationCommandCreate{
 		discord.SlashCommandCreate{
 			Name:                     "settings",
-			Description:              "Open the server settings panel",
+			Description:              "サーバー設定パネルを開く",
 			DefaultMemberPermissions: omit.New(&manageGuild),
 		},
 	}

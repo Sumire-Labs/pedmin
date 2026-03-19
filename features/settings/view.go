@@ -35,20 +35,20 @@ func (s *Settings) buildMainContainer(guildID snowflake.ID) discord.ContainerCom
 	}
 
 	components := []discord.ContainerSubComponent{
-		discord.NewTextDisplay("## 🐸 Pedmin Settings"),
+		discord.NewTextDisplay("## Pedmin Settings"),
 		discord.NewLargeSeparator(),
 	}
 
 	if len(options) > 0 {
 		components = append(components,
-			discord.NewTextDisplay("Select a module to configure:"),
+			discord.NewTextDisplay("設定するモジュールを選択してください:"),
 			discord.NewActionRow(
-				discord.NewStringSelectMenu(ModuleID+":select", "Choose a module...", options...),
+				discord.NewStringSelectMenu(ModuleID+":select", "モジュールを選択...", options...),
 			),
 		)
 	} else {
 		components = append(components,
-			discord.NewTextDisplay("No configurable modules registered."),
+			discord.NewTextDisplay("設定可能なモジュールがありません。"),
 		)
 	}
 
@@ -61,7 +61,7 @@ func (s *Settings) modulePanel(guildID snowflake.ID, moduleID string) discord.Me
 	if !ok {
 		return discord.NewMessageUpdateV2([]discord.LayoutComponent{
 			discord.NewContainer(
-				discord.NewTextDisplay("Module not found."),
+				discord.NewTextDisplay("モジュールが見つかりません。"),
 			).WithAccentColor(0xFF0000),
 		})
 	}
@@ -69,13 +69,13 @@ func (s *Settings) modulePanel(guildID snowflake.ID, moduleID string) discord.Me
 	info := m.Info()
 	enabled := s.bot.IsModuleEnabled(guildID, moduleID)
 
-	statusText := "Disabled"
-	toggleLabel := "Enable"
+	statusText := "無効"
+	toggleLabel := "有効にする"
 	toggleStyle := discord.ButtonStyleSuccess
 	accentColor := 0xFF6B6B
 	if enabled {
-		statusText = "Enabled"
-		toggleLabel = "Disable"
+		statusText = "有効"
+		toggleLabel = "無効にする"
 		toggleStyle = discord.ButtonStyleDanger
 		accentColor = 0x00B894
 	}
@@ -84,7 +84,7 @@ func (s *Settings) modulePanel(guildID snowflake.ID, moduleID string) discord.Me
 		discord.NewTextDisplay(fmt.Sprintf("## %s", info.Name)),
 		discord.NewTextDisplay(info.Description),
 		discord.NewLargeSeparator(),
-		discord.NewTextDisplay(fmt.Sprintf("**Status:** %s", statusText)),
+		discord.NewTextDisplay(fmt.Sprintf("**ステータス:** %s", statusText)),
 	}
 
 	settingsPanel := m.SettingsPanel(guildID)
@@ -101,7 +101,7 @@ func (s *Settings) modulePanel(guildID snowflake.ID, moduleID string) discord.Me
 		discord.NewLargeSeparator(),
 		discord.NewActionRow(
 			discord.NewButton(toggleStyle, toggleLabel, fmt.Sprintf("%s:toggle:%s", ModuleID, moduleID), "", 0),
-			discord.NewSecondaryButton("← Back", ModuleID+":back"),
+			discord.NewSecondaryButton("← 戻る", ModuleID+":back"),
 		),
 	)
 

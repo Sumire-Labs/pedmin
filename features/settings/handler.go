@@ -13,7 +13,7 @@ func (s *Settings) HandleCommand(e *events.ApplicationCommandInteractionCreate) 
 	if guildID == nil {
 		_ = e.CreateMessage(ephemeralV2(
 			discord.NewContainer(
-				discord.NewTextDisplay("Settings can only be used in a server."),
+				discord.NewTextDisplay("設定はサーバー内でのみ使用できます。"),
 			).WithAccentColor(0xFF0000),
 		))
 		return

@@ -15,7 +15,7 @@ func (b *Bot) onCommandInteraction(e *events.ApplicationCommandInteractionCreate
 			if cmd.CommandName() == cmdName {
 				guildID := e.GuildID()
 				if guildID != nil && !b.IsModuleEnabled(*guildID, m.Info().ID) {
-					_ = e.CreateMessage(errorMessage("This module is currently disabled."))
+					_ = e.CreateMessage(errorMessage("このモジュールは現在無効です。"))
 					return
 				}
 				m.HandleCommand(e)

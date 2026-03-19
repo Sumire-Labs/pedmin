@@ -22,7 +22,7 @@ func (p *Player) HandleModal(e *events.ModalSubmitInteractionCreate) {
 	}
 
 	if query == "" {
-		_ = e.CreateMessage(ephemeralV2Error("Please provide a search query or URL."))
+		_ = e.CreateMessage(ephemeralV2Error("検索キーワードまたはURLを入力してください。"))
 		return
 	}
 

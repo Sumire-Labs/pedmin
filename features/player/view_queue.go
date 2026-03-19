@@ -14,12 +14,12 @@ func BuildQueueUI(queue *Queue, player disgolink.Player) discord.ContainerCompon
 
 	if len(tracks) == 0 {
 		return discord.NewContainer(
-			discord.NewTextDisplay("### 📜 Queue"),
-			discord.NewTextDisplay("The queue is empty."),
+			discord.NewTextDisplay("### 📜 キュー"),
+			discord.NewTextDisplay("キューは空です。"),
 			discord.NewLargeSeparator(),
 			discord.NewActionRow(
-				discord.NewSecondaryButton("← Back", ModuleID+":back"),
-				discord.NewDangerButton("Clear Queue", ModuleID+":clear_queue"),
+				discord.NewSecondaryButton("← 戻る", ModuleID+":back"),
+				discord.NewDangerButton("キューをクリア", ModuleID+":clear_queue"),
 			),
 		).WithAccentColor(accentIdle)
 	}
@@ -46,16 +46,16 @@ func BuildQueueUI(queue *Queue, player disgolink.Player) discord.ContainerCompon
 	}
 
 	if end < len(tracks) {
-		lines = append(lines, fmt.Sprintf("  *...and %d more*", len(tracks)-end))
+		lines = append(lines, fmt.Sprintf("  *...他 %d曲*", len(tracks)-end))
 	}
 
 	components := []discord.ContainerSubComponent{
-		discord.NewTextDisplay(fmt.Sprintf("### 📜 Queue (%d tracks)", len(tracks))),
+		discord.NewTextDisplay(fmt.Sprintf("### 📜 キュー (%d曲)", len(tracks))),
 		discord.NewTextDisplay(strings.Join(lines, "\n")),
 		discord.NewLargeSeparator(),
 		discord.NewActionRow(
-			discord.NewSecondaryButton("← Back", ModuleID+":back"),
-			discord.NewDangerButton("Clear Queue", ModuleID+":clear_queue"),
+			discord.NewSecondaryButton("← 戻る", ModuleID+":back"),
+			discord.NewDangerButton("キューをクリア", ModuleID+":clear_queue"),
 		),
 	}
 

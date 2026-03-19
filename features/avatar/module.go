@@ -22,8 +22,8 @@ func New(logger *slog.Logger) *Avatar {
 func (a *Avatar) Info() module.Info {
 	return module.Info{
 		ID:          ModuleID,
-		Name:        "Avatar",
-		Description: "Display user avatars",
+		Name:        "アバター",
+		Description: "ユーザーのアバターを表示",
 		AlwaysOn:    true,
 	}
 }
@@ -32,11 +32,11 @@ func (a *Avatar) Commands() []discord.ApplicationCommandCreate {
 	return []discord.ApplicationCommandCreate{
 		discord.SlashCommandCreate{
 			Name:        "avatar",
-			Description: "Display a user's avatar",
+			Description: "ユーザーのアバターを表示する",
 			Options: []discord.ApplicationCommandOption{
 				discord.ApplicationCommandOptionUser{
 					Name:        "user",
-					Description: "The user whose avatar to display (defaults to you)",
+					Description: "アバターを表示するユーザー（省略時は自分）",
 					Required:    false,
 				},
 			},

@@ -52,11 +52,11 @@ func (p *Player) HandleComponent(e *events.ComponentInteractionCreate) {
 func (p *Player) handleAddModal(e *events.ComponentInteractionCreate) {
 	_ = e.Modal(discord.ModalCreate{
 		CustomID: ModuleID + ":add_modal",
-		Title:    "Add to Queue",
+		Title:    "キューに追加",
 		Components: []discord.LayoutComponent{
-			discord.NewLabel("Search query or URL",
+			discord.NewLabel("検索キーワードまたはURL",
 				discord.NewShortTextInput(ModuleID+":query").
-					WithPlaceholder("Song name or YouTube/Spotify URL").
+					WithPlaceholder("曲名またはYouTube/SpotifyのURL").
 					WithRequired(true),
 			),
 		},

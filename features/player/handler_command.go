@@ -8,7 +8,7 @@ import (
 func (p *Player) HandleCommand(e *events.ApplicationCommandInteractionCreate) {
 	guildID := e.GuildID()
 	if guildID == nil {
-		_ = e.CreateMessage(ephemeralV2Error("This command can only be used in a server."))
+		_ = e.CreateMessage(ephemeralV2Error("このコマンドはサーバー内でのみ使用できます。"))
 		return
 	}
 

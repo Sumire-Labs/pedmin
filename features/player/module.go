@@ -29,8 +29,8 @@ func New(link disgolink.Client, logger *slog.Logger) *Player {
 func (p *Player) Info() module.Info {
 	return module.Info{
 		ID:          ModuleID,
-		Name:        "Music Player",
-		Description: "Play music from various sources with a beautiful player UI",
+		Name:        "ミュージックプレイヤー",
+		Description: "様々なソースから音楽を再生するミュージックプレイヤー",
 		AlwaysOn:    false,
 	}
 }
@@ -39,7 +39,7 @@ func (p *Player) Commands() []discord.ApplicationCommandCreate {
 	return []discord.ApplicationCommandCreate{
 		discord.SlashCommandCreate{
 			Name:        "player",
-			Description: "Show the music player",
+			Description: "ミュージックプレイヤーを表示",
 		},
 	}
 }

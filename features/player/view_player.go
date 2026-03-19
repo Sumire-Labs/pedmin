@@ -33,7 +33,7 @@ func BuildPlayerUI(player disgolink.Player, queue *Queue) discord.ContainerCompo
 
 	components := []discord.ContainerSubComponent{
 		discord.NewSection(
-			discord.NewTextDisplay(fmt.Sprintf("### %s Now Playing", statusIcon)),
+			discord.NewTextDisplay(fmt.Sprintf("### %s 再生中", statusIcon)),
 			discord.NewTextDisplay(fmt.Sprintf("**%s**\nby %s", info.Title, info.Author)),
 		).WithAccessory(buildThumbnail(info)),
 		discord.NewLargeSeparator(),
@@ -54,8 +54,8 @@ func BuildPlayerUI(player disgolink.Player, queue *Queue) discord.ContainerCompo
 
 func buildIdleUI(queue *Queue) discord.ContainerComponent {
 	components := []discord.ContainerSubComponent{
-		discord.NewTextDisplay("### 🐸 Pedmin Player"),
-		discord.NewTextDisplay("No track playing. Use the buttons below to add music!"),
+		discord.NewTextDisplay("### Pedmin Player"),
+		discord.NewTextDisplay("再生中の曲はありません。ボタンから曲を追加してください！"),
 		discord.NewLargeSeparator(),
 		buildControlRow(false),
 		buildSecondaryRow(queue.LoopMode(), 100),
@@ -95,7 +95,7 @@ func buildSecondaryRow(loopMode LoopMode, volume int) discord.ActionRowComponent
 		discord.NewSecondaryButton(loopLabel, ModuleID+":loop"),
 		discord.NewSecondaryButton("🔉", ModuleID+":vol_down"),
 		discord.NewSecondaryButton(fmt.Sprintf("🔊 %d%%", volume), ModuleID+":vol_up"),
-		discord.NewSuccessButton("➕ Add", ModuleID+":add"),
-		discord.NewSecondaryButton("📜 Queue", ModuleID+":queue"),
+		discord.NewSuccessButton("➕ 追加", ModuleID+":add"),
+		discord.NewSecondaryButton("📜 キュー", ModuleID+":queue"),
 	)
 }
