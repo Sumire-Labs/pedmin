@@ -12,6 +12,7 @@ import (
 	"github.com/s12kuma01/pedmin/config"
 	"github.com/s12kuma01/pedmin/features/avatar"
 	"github.com/s12kuma01/pedmin/features/fuckfetch"
+	loggermod "github.com/s12kuma01/pedmin/features/logger"
 	"github.com/s12kuma01/pedmin/features/ping"
 	"github.com/s12kuma01/pedmin/features/player"
 	"github.com/s12kuma01/pedmin/features/settings"
@@ -51,6 +52,10 @@ func main() {
 
 	fuckfetchModule := fuckfetch.New(logger)
 	b.Register(fuckfetchModule)
+
+	loggerModule := loggermod.New(b, b.Client, guildStore, logger)
+	loggermod.SetupListeners(b.Client, loggerModule)
+	b.Register(loggerModule)
 
 	playerModule := player.New(b.Lavalink, b.Client, cfg.DefaultVolume, cfg.AutoLeaveTimeout, logger)
 	player.SetupListeners(b.Lavalink, playerModule)

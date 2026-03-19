@@ -13,5 +13,7 @@ type GuildStore interface {
 	Save(settings *GuildSettings) error
 	IsModuleEnabled(guildID snowflake.ID, moduleID string) (bool, error)
 	SetModuleEnabled(guildID snowflake.ID, moduleID string, enabled bool) error
+	GetModuleSettings(guildID snowflake.ID, moduleID string) (string, error)
+	SetModuleSettings(guildID snowflake.ID, moduleID string, settings string) error
 	Close() error
 }

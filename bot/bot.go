@@ -35,13 +35,16 @@ func New(cfg *config.Config, guildStore store.GuildStore, logger *slog.Logger) (
 
 	client, err := disgo.New(cfg.Token,
 		disgobot.WithCacheConfigOpts(
-			cache.WithCaches(cache.FlagVoiceStates),
+			cache.WithCaches(cache.FlagVoiceStates|cache.FlagMessages),
 		),
 		disgobot.WithGatewayConfigOpts(
 			gateway.WithIntents(
 				gateway.IntentGuilds,
 				gateway.IntentGuildVoiceStates,
 				gateway.IntentGuildMessages,
+				gateway.IntentGuildMembers,
+				gateway.IntentGuildModeration,
+				gateway.IntentMessageContent,
 			),
 		),
 		disgobot.WithEventListenerFunc(b.onCommandInteraction),

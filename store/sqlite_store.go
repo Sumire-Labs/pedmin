@@ -219,6 +219,27 @@ func (s *SQLiteStore) SetModuleEnabled(guildID snowflake.ID, moduleID string, en
 	return nil
 }
 
+func (s *SQLiteStore) GetModuleSettings(guildID snowflake.ID, moduleID string) (string, error) {
+	var settings string
+	err := s.db.QueryRow(
+		"SELECT settings FROM guild_module_settings WHERE guild_id = ? AND module_id = ?",
+		int64(guildID), moduleID,
+	).Scan(&settings)
+	if err == sql.ErrNoRows {
+		return "{}", nil
+	}
+	return settings, err
+}
+
+func (s *SQLiteStore) SetModuleSettings(guildID snowflake.ID, moduleID string, settings string) error {
+	_, err := s.db.Exec(
+		`INSERT INTO guild_module_settings (guild_id, module_id, settings) VALUES (?, ?, ?)
+		 ON CONFLICT(guild_id, module_id) DO UPDATE SET settings = excluded.settings`,
+		int64(guildID), moduleID, settings,
+	)
+	return err
+}
+
 func (s *SQLiteStore) Close() error {
 	return s.db.Close()
 }
