@@ -15,12 +15,13 @@ import (
 )
 
 type Bot struct {
-	Cfg      *config.Config
-	Client   *disgobot.Client
-	Lavalink disgolink.Client
-	Store    store.GuildStore
-	Modules  map[string]module.Module
-	Logger *slog.Logger
+	Cfg            *config.Config
+	Client         *disgobot.Client
+	Lavalink       disgolink.Client
+	Store          store.GuildStore
+	Modules        map[string]module.Module
+	Logger         *slog.Logger
+	cancelPresence context.CancelFunc
 }
 
 func New(cfg *config.Config, guildStore store.GuildStore, logger *slog.Logger) (*Bot, error) {
@@ -65,10 +66,21 @@ func (b *Bot) Start(ctx context.Context) error {
 	if err := b.SyncCommands(); err != nil {
 		return err
 	}
-	return b.Client.OpenGateway(ctx)
+	if err := b.Client.OpenGateway(ctx); err != nil {
+		return err
+	}
+
+	presenceCtx, cancel := context.WithCancel(context.Background())
+	b.cancelPresence = cancel
+	go b.startPresenceUpdater(presenceCtx)
+
+	return nil
 }
 
 func (b *Bot) Close(ctx context.Context) {
+	if b.cancelPresence != nil {
+		b.cancelPresence()
+	}
 	b.Client.Close(ctx)
 	b.Lavalink.Close()
 }
