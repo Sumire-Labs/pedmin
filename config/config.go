@@ -1,3 +1,4 @@
+// Package config loads application configuration from environment variables and CUE files.
 package config
 
 import (

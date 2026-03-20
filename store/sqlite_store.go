@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 	"time"
 
 	"github.com/disgoorg/snowflake/v2"
@@ -336,6 +337,9 @@ func (s *SQLiteStore) CreateRSSFeed(feed *RSSFeed) error {
 		"INSERT INTO rss_feeds (guild_id, url, channel_id, title) VALUES (?, ?, ?, ?) RETURNING id",
 		int64(feed.GuildID), feed.URL, int64(feed.ChannelID), feed.Title,
 	).Scan(&feed.ID)
+	if err != nil && strings.Contains(err.Error(), "UNIQUE constraint") {
+		return fmt.Errorf("%w: %s", ErrDuplicateFeed, feed.URL)
+	}
 	return err
 }
 

@@ -3,6 +3,7 @@ package rss
 import (
 	"context"
 	"crypto/sha256"
+	"errors"
 	"fmt"
 	"log/slog"
 	"regexp"
@@ -41,7 +42,7 @@ func (r *RSS) AddFeed(ctx context.Context, guildID snowflake.ID, channelID snowf
 	}
 
 	if err := r.store.CreateRSSFeed(feed); err != nil {
-		if strings.Contains(err.Error(), "UNIQUE constraint") {
+		if errors.Is(err, store.ErrDuplicateFeed) {
 			return nil, fmt.Errorf("このフィードは既に登録されています")
 		}
 		return nil, fmt.Errorf("failed to create feed: %w", err)

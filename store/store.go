@@ -1,10 +1,14 @@
+// Package store defines the GuildStore persistence interface and data types.
 package store
 
 import (
+	"errors"
 	"time"
 
 	"github.com/disgoorg/snowflake/v2"
 )
+
+var ErrDuplicateFeed = errors.New("duplicate feed")
 
 type GuildSettings struct {
 	GuildID        snowflake.ID          `json:"guild_id"`

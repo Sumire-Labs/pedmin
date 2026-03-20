@@ -42,7 +42,6 @@ func main() {
 		os.Exit(1)
 	}
 
-	// Register modules
 	settingsModule := settings.New(b, logger)
 	b.Register(settingsModule)
 
@@ -69,7 +68,6 @@ func main() {
 	player.SetupListeners(b.Lavalink, playerModule)
 	b.Register(playerModule)
 
-	// Connect to Lavalink
 	go func() {
 		if err := player.ConnectNode(context.Background(), b.Lavalink, cfg.LavalinkHost, cfg.LavalinkPassword); err != nil {
 			logger.Error("failed to connect to lavalink", slog.Any("error", err))
@@ -78,7 +76,6 @@ func main() {
 		}
 	}()
 
-	// Start the bot
 	if err := b.Start(context.Background()); err != nil {
 		logger.Error("failed to start bot", slog.Any("error", err))
 		os.Exit(1)
@@ -95,5 +92,7 @@ func main() {
 	logger.Info("shutting down...")
 	rssModule.StopPoller()
 	b.Close(context.Background())
-	_ = guildStore.Close()
+	if err := guildStore.Close(); err != nil {
+		logger.Error("failed to close store", slog.Any("error", err))
+	}
 }

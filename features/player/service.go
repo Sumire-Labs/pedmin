@@ -6,7 +6,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/disgoorg/disgo/discord"
 	"github.com/disgoorg/disgo/events"
 	"github.com/disgoorg/disgolink/v3/disgolink"
 	"github.com/disgoorg/disgolink/v3/lavalink"
@@ -17,56 +16,6 @@ const lavalinkTimeout = 2 * time.Second
 
 func lavalinkCtx() (context.Context, context.CancelFunc) {
 	return context.WithTimeout(context.Background(), lavalinkTimeout)
-}
-
-func (p *Player) handleSkip(e *events.ComponentInteractionCreate, guildID snowflake.ID) {
-	player := p.lavalink.ExistingPlayer(guildID)
-	if player == nil {
-		_ = e.DeferUpdateMessage()
-		return
-	}
-
-	queue := p.queues.Get(guildID)
-	next, ok := queue.Next()
-	if !ok {
-		ctx, cancel := lavalinkCtx()
-		defer cancel()
-		_ = player.Update(ctx, lavalink.WithNullTrack())
-		p.respondWithPlayerUpdate(e, player, guildID)
-		return
-	}
-
-	ctx, cancel := lavalinkCtx()
-	defer cancel()
-	if err := player.Update(ctx, lavalink.WithTrack(next)); err != nil {
-		p.logger.Error("failed to skip", slog.Any("error", err))
-	}
-	p.respondWithPlayerUpdate(e, player, guildID)
-}
-
-func (p *Player) handleStop(e *events.ComponentInteractionCreate, guildID snowflake.ID) {
-	player := p.lavalink.ExistingPlayer(guildID)
-	if player != nil {
-		ctx, cancel := lavalinkCtx()
-		_ = player.Destroy(ctx)
-		cancel()
-		p.lavalink.RemovePlayer(guildID)
-	}
-	p.queues.Delete(guildID)
-	_ = e.Client().UpdateVoiceState(context.Background(), guildID, nil, false, false)
-
-	queue := p.queues.Get(guildID)
-	newPlayer := p.lavalink.Player(guildID)
-	ui := BuildPlayerUI(newPlayer, queue)
-	_ = e.UpdateMessage(discord.NewMessageUpdateV2([]discord.LayoutComponent{ui}))
-}
-
-func (p *Player) handleLoop(e *events.ComponentInteractionCreate, guildID snowflake.ID) {
-	queue := p.queues.Get(guildID)
-	queue.CycleLoop()
-
-	player := p.lavalink.Player(guildID)
-	p.respondWithPlayerUpdate(e, player, guildID)
 }
 
 func (p *Player) loadAndPlay(e *events.ModalSubmitInteractionCreate, guildID snowflake.ID, query string) {
@@ -119,6 +68,8 @@ func (p *Player) playTrack(e *events.ModalSubmitInteractionCreate, guildID snowf
 	queue := p.queues.Get(guildID)
 	queue.Add(track)
 
+	// Only set current when this is the first track; otherwise the queue
+	// already has a current track and this one should wait its turn.
 	if queue.Len() == 1 {
 		queue.SetCurrent(0)
 	}
@@ -134,45 +85,5 @@ func (p *Player) playTrack(e *events.ModalSubmitInteractionCreate, guildID snowf
 		ctx, cancel := lavalinkCtx()
 		_ = player.Update(ctx, lavalink.WithTrack(current))
 		cancel()
-	}
-}
-
-func (p *Player) respondWithPlayerUpdate(e *events.ComponentInteractionCreate, player disgolink.Player, guildID snowflake.ID) {
-	queue := p.queues.Get(guildID)
-	ui := BuildPlayerUI(player, queue)
-	_ = e.UpdateMessage(discord.NewMessageUpdateV2([]discord.LayoutComponent{ui}))
-}
-
-func (p *Player) trackMessage(guildID, channelID, messageID snowflake.ID) {
-	p.messages.Store(guildID, trackedMessage{
-		channelID: channelID,
-		messageID: messageID,
-	})
-}
-
-func (p *Player) deleteTrackedMessage(guildID snowflake.ID) {
-	val, ok := p.messages.LoadAndDelete(guildID)
-	if !ok {
-		return
-	}
-	tracked := val.(trackedMessage)
-	if err := p.client.Rest.DeleteMessage(tracked.channelID, tracked.messageID); err != nil {
-		p.logger.Warn("failed to delete tracked message", slog.Any("error", err))
-	}
-}
-
-func (p *Player) updatePlayerMessage(player disgolink.Player) {
-	guildID := player.GuildID()
-	val, ok := p.messages.Load(guildID)
-	if !ok {
-		return
-	}
-	tracked := val.(trackedMessage)
-
-	queue := p.queues.Get(guildID)
-	ui := BuildPlayerUI(player, queue)
-	if _, err := p.client.Rest.UpdateMessage(tracked.channelID, tracked.messageID, discord.NewMessageUpdateV2([]discord.LayoutComponent{ui})); err != nil {
-		p.logger.Warn("failed to update player message", slog.Any("error", err))
-		p.messages.Delete(guildID)
 	}
 }

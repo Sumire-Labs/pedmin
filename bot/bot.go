@@ -1,3 +1,4 @@
+// Package bot manages the Discord client lifecycle, module registry, and interaction routing.
 package bot
 
 import (
@@ -20,7 +21,7 @@ type Bot struct {
 	Client         *disgobot.Client
 	Lavalink       disgolink.Client
 	Store          store.GuildStore
-	Modules        map[string]module.Module
+	modules        map[string]module.Module
 	Logger         *slog.Logger
 	cancelPresence context.CancelFunc
 }
@@ -29,7 +30,7 @@ func New(cfg *config.Config, guildStore store.GuildStore, logger *slog.Logger) (
 	b := &Bot{
 		Cfg:     cfg,
 		Store:   guildStore,
-		Modules: make(map[string]module.Module),
+		modules: make(map[string]module.Module),
 		Logger:  logger,
 	}
 
@@ -66,7 +67,7 @@ func New(cfg *config.Config, guildStore store.GuildStore, logger *slog.Logger) (
 
 func (b *Bot) Register(m module.Module) {
 	info := m.Info()
-	b.Modules[info.ID] = m
+	b.modules[info.ID] = m
 	b.Logger.Info("registered module", slog.String("module", info.ID))
 }
 
@@ -94,7 +95,7 @@ func (b *Bot) Close(ctx context.Context) {
 }
 
 func (b *Bot) IsModuleEnabled(guildID snowflake.ID, moduleID string) bool {
-	m, ok := b.Modules[moduleID]
+	m, ok := b.modules[moduleID]
 	if !ok {
 		return false
 	}
@@ -110,7 +111,7 @@ func (b *Bot) IsModuleEnabled(guildID snowflake.ID, moduleID string) bool {
 }
 
 func (b *Bot) GetModules() map[string]module.Module {
-	return b.Modules
+	return b.modules
 }
 
 func (b *Bot) SetModuleEnabled(guildID snowflake.ID, moduleID string, enabled bool) error {

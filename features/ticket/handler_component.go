@@ -12,6 +12,9 @@ import (
 func (t *Ticket) handleComponent(e *events.ComponentInteractionCreate) {
 	customID := e.Data.CustomID()
 	parts := strings.SplitN(customID, ":", 3)
+	if len(parts) < 2 {
+		return
+	}
 	action := parts[1]
 
 	guildID := e.GuildID()

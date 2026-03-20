@@ -2,21 +2,30 @@ package bot
 
 import (
 	"context"
+	"time"
 
 	"github.com/disgoorg/disgo/events"
 	"github.com/disgoorg/snowflake/v2"
 	"github.com/s12kuma01/pedmin/module"
 )
 
+// Bot's own voice state/server updates are forwarded to Lavalink so it can
+// manage the audio connection. Other users' voice state changes are forwarded
+// to modules (e.g. player auto-leave on empty VC).
+
 func (b *Bot) onVoiceStateUpdate(e *events.GuildVoiceStateUpdate) {
 	if e.VoiceState.UserID != b.Client.ApplicationID {
 		return
 	}
-	b.Lavalink.OnVoiceStateUpdate(context.TODO(), e.VoiceState.GuildID, e.VoiceState.ChannelID, e.VoiceState.SessionID)
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+	b.Lavalink.OnVoiceStateUpdate(ctx, e.VoiceState.GuildID, e.VoiceState.ChannelID, e.VoiceState.SessionID)
 }
 
 func (b *Bot) onVoiceServerUpdate(e *events.VoiceServerUpdate) {
-	b.Lavalink.OnVoiceServerUpdate(context.TODO(), e.GuildID, e.Token, *e.Endpoint)
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+	b.Lavalink.OnVoiceServerUpdate(ctx, e.GuildID, e.Token, *e.Endpoint)
 }
 
 func (b *Bot) onMemberVoiceStateUpdate(e *events.GuildVoiceStateUpdate) {
@@ -27,7 +36,7 @@ func (b *Bot) onMemberVoiceStateUpdate(e *events.GuildVoiceStateUpdate) {
 	if e.VoiceState.ChannelID != nil {
 		channelID = *e.VoiceState.ChannelID
 	}
-	for _, m := range b.Modules {
+	for _, m := range b.modules {
 		if vsl, ok := m.(module.VoiceStateListener); ok {
 			vsl.OnVoiceStateUpdate(e.VoiceState.GuildID, channelID, e.VoiceState.UserID)
 		}

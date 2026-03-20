@@ -10,7 +10,7 @@ import (
 func (b *Bot) onCommandInteraction(e *events.ApplicationCommandInteractionCreate) {
 	cmdName := e.SlashCommandInteractionData().CommandName()
 
-	for _, m := range b.Modules {
+	for _, m := range b.modules {
 		for _, cmd := range m.Commands() {
 			if cmd.CommandName() == cmdName {
 				guildID := e.GuildID()
@@ -30,7 +30,7 @@ func (b *Bot) onComponentInteraction(e *events.ComponentInteractionCreate) {
 	customID := e.Data.CustomID()
 	moduleID, _, _ := strings.Cut(customID, ":")
 
-	m, ok := b.Modules[moduleID]
+	m, ok := b.modules[moduleID]
 	if !ok {
 		b.Logger.Warn("unhandled component", slog.String("custom_id", customID))
 		return
@@ -43,7 +43,7 @@ func (b *Bot) onModalSubmit(e *events.ModalSubmitInteractionCreate) {
 	customID := e.Data.CustomID
 	moduleID, _, _ := strings.Cut(customID, ":")
 
-	m, ok := b.Modules[moduleID]
+	m, ok := b.modules[moduleID]
 	if !ok {
 		b.Logger.Warn("unhandled modal", slog.String("custom_id", customID))
 		return

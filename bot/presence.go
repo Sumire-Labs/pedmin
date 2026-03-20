@@ -47,7 +47,7 @@ func (b *Bot) updatePresence(ctx context.Context, proc *process.Process) {
 	}
 
 	ramMB := memInfo.RSS / 1024 / 1024
-	status := fmt.Sprintf("RAM: %dmb | CPU: %.1f%%", ramMB, cpuPercent)
+	status := fmt.Sprintf("RAM: %d MB | CPU: %.1f%%", ramMB, cpuPercent)
 
 	if err := b.Client.SetPresence(ctx, gateway.WithWatchingActivity(status)); err != nil {
 		b.Logger.Warn("failed to set presence", slog.Any("error", err))

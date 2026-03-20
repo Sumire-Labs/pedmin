@@ -1,3 +1,4 @@
+// Package module defines the Module interface that all feature modules implement.
 package module
 
 import (

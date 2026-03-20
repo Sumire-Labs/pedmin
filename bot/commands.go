@@ -9,7 +9,7 @@ import (
 func (b *Bot) SyncCommands() error {
 	var commands []discord.ApplicationCommandCreate
 
-	for _, m := range b.Modules {
+	for _, m := range b.modules {
 		commands = append(commands, m.Commands()...)
 	}
 
