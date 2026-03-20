@@ -4,7 +4,6 @@ import (
 	"context"
 	"log/slog"
 	"strings"
-	"time"
 
 	"github.com/disgoorg/disgo/events"
 	"github.com/disgoorg/disgolink/v3/disgolink"
@@ -12,10 +11,8 @@ import (
 	"github.com/disgoorg/snowflake/v2"
 )
 
-const lavalinkTimeout = 2 * time.Second
-
-func lavalinkCtx() (context.Context, context.CancelFunc) {
-	return context.WithTimeout(context.Background(), lavalinkTimeout)
+func (p *Player) lavalinkCtx() (context.Context, context.CancelFunc) {
+	return context.WithTimeout(context.Background(), p.lavalinkTimeout)
 }
 
 func (p *Player) loadAndPlay(e *events.ModalSubmitInteractionCreate, guildID snowflake.ID, query string) {
@@ -29,7 +26,7 @@ func (p *Player) loadAndPlay(e *events.ModalSubmitInteractionCreate, guildID sno
 		return
 	}
 
-	loadCtx, loadCancel := context.WithTimeout(context.Background(), 10*time.Second)
+	loadCtx, loadCancel := context.WithTimeout(context.Background(), p.lavalinkLoadTimeout)
 	defer loadCancel()
 	node.LoadTracksHandler(loadCtx, query, disgolink.NewResultHandler(
 		func(track lavalink.Track) {
@@ -45,7 +42,7 @@ func (p *Player) loadAndPlay(e *events.ModalSubmitInteractionCreate, guildID sno
 
 			_ = p.joinVoiceChannel(e.Client(), guildID, e.Member().User.ID)
 			player := p.lavalink.Player(guildID)
-			ctx, cancel := lavalinkCtx()
+			ctx, cancel := p.lavalinkCtx()
 			_ = player.Update(ctx, lavalink.WithTrack(playlist.Tracks[0]))
 			cancel()
 		},
@@ -82,7 +79,7 @@ func (p *Player) playTrack(e *events.ModalSubmitInteractionCreate, guildID snowf
 		if !ok {
 			current = track
 		}
-		ctx, cancel := lavalinkCtx()
+		ctx, cancel := p.lavalinkCtx()
 		_ = player.Update(ctx, lavalink.WithTrack(current))
 		cancel()
 	}

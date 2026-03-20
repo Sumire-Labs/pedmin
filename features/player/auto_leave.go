@@ -43,7 +43,7 @@ func (p *Player) startAutoLeaveTimer(guildID snowflake.ID) {
 		p.leaveTimers.Delete(guildID)
 
 		if player := p.lavalink.ExistingPlayer(guildID); player != nil {
-			ctx, cancel := lavalinkCtx()
+			ctx, cancel := p.lavalinkCtx()
 			_ = player.Destroy(ctx)
 			cancel()
 			p.lavalink.RemovePlayer(guildID)

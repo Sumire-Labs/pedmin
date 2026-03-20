@@ -4,15 +4,9 @@ import (
 	"context"
 	"log/slog"
 	"strings"
-	"time"
 
 	"github.com/disgoorg/disgo/discord"
 	"github.com/disgoorg/disgo/events"
-)
-
-const (
-	defaultTimeout     = 10 * time.Second
-	powerActionTimeout = 15 * time.Second
 )
 
 func (p *Panel) HandleComponent(e *events.ComponentInteractionCreate) {
@@ -54,7 +48,7 @@ func (p *Panel) handleSelect(e *events.ComponentInteractionCreate) {
 
 	_ = e.DeferUpdateMessage()
 
-	ctx, cancel := context.WithTimeout(context.Background(), defaultTimeout)
+	ctx, cancel := context.WithTimeout(context.Background(), p.cfg.HTTPClientTimeout)
 	defer cancel()
 
 	server, res, err := p.GetServerDetail(ctx, identifier)
@@ -70,7 +64,7 @@ func (p *Panel) handleSelect(e *events.ComponentInteractionCreate) {
 func (p *Panel) handlePower(e *events.ComponentInteractionCreate, identifier, signal string) {
 	_ = e.DeferUpdateMessage()
 
-	ctx, cancel := context.WithTimeout(context.Background(), powerActionTimeout)
+	ctx, cancel := context.WithTimeout(context.Background(), p.cfg.PanelPowerActionTimeout)
 	defer cancel()
 
 	server, res, err := p.PowerAction(ctx, identifier, signal)
@@ -86,7 +80,7 @@ func (p *Panel) handlePower(e *events.ComponentInteractionCreate, identifier, si
 func (p *Panel) handleRefresh(e *events.ComponentInteractionCreate, identifier string) {
 	_ = e.DeferUpdateMessage()
 
-	ctx, cancel := context.WithTimeout(context.Background(), defaultTimeout)
+	ctx, cancel := context.WithTimeout(context.Background(), p.cfg.HTTPClientTimeout)
 	defer cancel()
 
 	server, res, err := p.GetServerDetail(ctx, identifier)
@@ -102,7 +96,7 @@ func (p *Panel) handleRefresh(e *events.ComponentInteractionCreate, identifier s
 func (p *Panel) handleBack(e *events.ComponentInteractionCreate) {
 	_ = e.DeferUpdateMessage()
 
-	ctx, cancel := context.WithTimeout(context.Background(), defaultTimeout)
+	ctx, cancel := context.WithTimeout(context.Background(), p.cfg.HTTPClientTimeout)
 	defer cancel()
 
 	servers, err := p.ListServersWithStatus(ctx)
@@ -142,7 +136,7 @@ func (p *Panel) HandleModal(e *events.ModalSubmitInteractionCreate) {
 
 	_ = e.DeferCreateMessage(true)
 
-	ctx, cancel := context.WithTimeout(context.Background(), defaultTimeout)
+	ctx, cancel := context.WithTimeout(context.Background(), p.cfg.HTTPClientTimeout)
 	defer cancel()
 
 	if err := p.SendConsoleCommand(ctx, identifier, command); err != nil {

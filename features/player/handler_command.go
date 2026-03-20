@@ -22,7 +22,7 @@ func (p *Player) HandleCommand(e *events.ApplicationCommandInteractionCreate) {
 
 	player := p.lavalink.Player(*guildID)
 	if player.Volume() != p.defaultVolume {
-		ctx, cancel := lavalinkCtx()
+		ctx, cancel := p.lavalinkCtx()
 		_ = player.Update(ctx, lavalink.WithVolume(p.defaultVolume))
 		cancel()
 	}

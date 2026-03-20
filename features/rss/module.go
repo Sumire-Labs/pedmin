@@ -3,6 +3,7 @@ package rss
 import (
 	"context"
 	"log/slog"
+	"time"
 
 	disgobot "github.com/disgoorg/disgo/bot"
 	"github.com/disgoorg/disgo/discord"
@@ -19,19 +20,23 @@ type Bot interface {
 }
 
 type RSS struct {
-	bot    Bot
-	client *disgobot.Client
-	store  store.GuildStore
-	logger *slog.Logger
-	cancel context.CancelFunc
+	bot          Bot
+	client       *disgobot.Client
+	store        store.GuildStore
+	logger       *slog.Logger
+	cancel       context.CancelFunc
+	pollInterval time.Duration
+	feedTimeout  time.Duration
 }
 
-func New(bot Bot, client *disgobot.Client, guildStore store.GuildStore, logger *slog.Logger) *RSS {
+func New(bot Bot, client *disgobot.Client, guildStore store.GuildStore, pollInterval, feedTimeout time.Duration, logger *slog.Logger) *RSS {
 	return &RSS{
-		bot:    bot,
-		client: client,
-		store:  guildStore,
-		logger: logger,
+		bot:          bot,
+		client:       client,
+		store:        guildStore,
+		pollInterval: pollInterval,
+		feedTimeout:  feedTimeout,
+		logger:       logger,
 	}
 }
 

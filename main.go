@@ -63,7 +63,7 @@ func main() {
 	loggermod.SetupListeners(b.Client, loggerModule)
 	b.Register(loggerModule)
 
-	rssModule := rssmod.New(b, b.Client, guildStore, logger)
+	rssModule := rssmod.New(b, b.Client, guildStore, cfg.RSSPollInterval, cfg.RSSFeedTimeout, logger)
 	b.Register(rssModule)
 
 	panelModule := panelmod.New(cfg, logger)
@@ -72,7 +72,7 @@ func main() {
 	urlModule := urlmod.New(cfg, logger)
 	b.Register(urlModule)
 
-	playerModule := player.New(b.Lavalink, b.Client, cfg.DefaultVolume, cfg.AutoLeaveTimeout, logger)
+	playerModule := player.New(b.Lavalink, b.Client, cfg.DefaultVolume, cfg.AutoLeaveTimeout, cfg.LavalinkTimeout, cfg.LavalinkLoadTimeout, logger)
 	player.SetupListeners(b.Lavalink, playerModule)
 	b.Register(playerModule)
 

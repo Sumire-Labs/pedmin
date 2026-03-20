@@ -7,7 +7,6 @@ import (
 	"net/url"
 	"strconv"
 	"strings"
-	"time"
 
 	"github.com/disgoorg/disgo/discord"
 	"github.com/disgoorg/disgo/events"
@@ -70,7 +69,7 @@ func (r *RSS) handleAddChannel(e *events.ComponentInteractionCreate, encodedURL 
 
 	_ = e.DeferCreateMessage(true)
 
-	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), r.feedTimeout)
 	defer cancel()
 
 	feed, err := r.AddFeed(ctx, *e.GuildID(), channelID, feedURL)

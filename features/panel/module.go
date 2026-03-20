@@ -21,7 +21,7 @@ type Panel struct {
 func New(cfg *config.Config, logger *slog.Logger) *Panel {
 	return &Panel{
 		cfg:     cfg,
-		pelican: NewPelicanClient(cfg.PanelURL, cfg.PanelAPIKey),
+		pelican: NewPelicanClient(cfg.PanelURL, cfg.PanelAPIKey, cfg.HTTPClientTimeout),
 		logger:  logger,
 	}
 }

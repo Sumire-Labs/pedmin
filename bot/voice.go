@@ -2,7 +2,6 @@ package bot
 
 import (
 	"context"
-	"time"
 
 	"github.com/disgoorg/disgo/events"
 	"github.com/disgoorg/snowflake/v2"
@@ -17,13 +16,13 @@ func (b *Bot) onVoiceStateUpdate(e *events.GuildVoiceStateUpdate) {
 	if e.VoiceState.UserID != b.Client.ApplicationID {
 		return
 	}
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), b.Cfg.LavalinkTimeout)
 	defer cancel()
 	b.Lavalink.OnVoiceStateUpdate(ctx, e.VoiceState.GuildID, e.VoiceState.ChannelID, e.VoiceState.SessionID)
 }
 
 func (b *Bot) onVoiceServerUpdate(e *events.VoiceServerUpdate) {
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), b.Cfg.LavalinkTimeout)
 	defer cancel()
 	b.Lavalink.OnVoiceServerUpdate(ctx, e.GuildID, e.Token, *e.Endpoint)
 }

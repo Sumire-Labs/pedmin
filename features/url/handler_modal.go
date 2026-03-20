@@ -4,7 +4,6 @@ import (
 	"context"
 	"log/slog"
 	"strings"
-	"time"
 
 	"github.com/disgoorg/disgo/events"
 )
@@ -33,7 +32,7 @@ func (u *URL) handleShortenModal(e *events.ModalSubmitInteractionCreate) {
 
 	_ = e.DeferUpdateMessage()
 
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), u.cfg.ShortenTimeout)
 	defer cancel()
 
 	shortURL, err := u.Shorten(ctx, rawURL)
@@ -60,7 +59,7 @@ func (u *URL) handleCheckModal(e *events.ModalSubmitInteractionCreate) {
 
 	_ = e.DeferUpdateMessage()
 
-	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), u.cfg.ScanTimeout)
 	defer cancel()
 
 	result, err := u.Check(ctx, rawURL)

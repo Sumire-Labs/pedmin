@@ -90,14 +90,14 @@ func (p *Player) handleSkip(e *events.ComponentInteractionCreate, guildID snowfl
 	queue := p.queues.Get(guildID)
 	next, ok := queue.Next()
 	if !ok {
-		ctx, cancel := lavalinkCtx()
+		ctx, cancel := p.lavalinkCtx()
 		defer cancel()
 		_ = player.Update(ctx, lavalink.WithNullTrack())
 		p.respondWithPlayerUpdate(e, player, guildID)
 		return
 	}
 
-	ctx, cancel := lavalinkCtx()
+	ctx, cancel := p.lavalinkCtx()
 	defer cancel()
 	if err := player.Update(ctx, lavalink.WithTrack(next)); err != nil {
 		p.logger.Error("failed to skip", slog.Any("error", err))
@@ -108,7 +108,7 @@ func (p *Player) handleSkip(e *events.ComponentInteractionCreate, guildID snowfl
 func (p *Player) handleStop(e *events.ComponentInteractionCreate, guildID snowflake.ID) {
 	player := p.lavalink.ExistingPlayer(guildID)
 	if player != nil {
-		ctx, cancel := lavalinkCtx()
+		ctx, cancel := p.lavalinkCtx()
 		_ = player.Destroy(ctx)
 		cancel()
 		p.lavalink.RemovePlayer(guildID)

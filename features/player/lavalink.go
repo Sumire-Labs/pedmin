@@ -38,7 +38,7 @@ func (p *Player) onTrackEnd(player disgolink.Player, event lavalink.TrackEndEven
 		return
 	}
 
-	ctx, cancel := lavalinkCtx()
+	ctx, cancel := p.lavalinkCtx()
 	defer cancel()
 	if err := player.Update(ctx, lavalink.WithTrack(next)); err != nil {
 		p.logger.Error("failed to play next track", slog.Any("error", err))
@@ -62,7 +62,7 @@ func (p *Player) onTrackStuck(player disgolink.Player, event lavalink.TrackStuck
 	if !ok {
 		return
 	}
-	ctx, cancel := lavalinkCtx()
+	ctx, cancel := p.lavalinkCtx()
 	defer cancel()
 	_ = player.Update(ctx, lavalink.WithTrack(next))
 }

@@ -21,7 +21,7 @@ type URL struct {
 func New(cfg *config.Config, logger *slog.Logger) *URL {
 	return &URL{
 		cfg:    cfg,
-		client: NewURLClient(cfg.XGDAPIKey, cfg.VTAPIKey),
+		client: NewURLClient(cfg.XGDAPIKey, cfg.VTAPIKey, cfg.HTTPClientTimeout),
 		logger: logger,
 	}
 }

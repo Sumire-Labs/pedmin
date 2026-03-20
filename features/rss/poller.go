@@ -6,8 +6,6 @@ import (
 	"time"
 )
 
-const PollInterval = 5 * time.Minute
-
 func (r *RSS) StartPoller(ctx context.Context) {
 	ctx, r.cancel = context.WithCancel(ctx)
 	go r.pollLoop(ctx)
@@ -20,9 +18,9 @@ func (r *RSS) StopPoller() {
 }
 
 func (r *RSS) pollLoop(ctx context.Context) {
-	r.logger.Info("rss poller started", slog.Duration("interval", PollInterval))
+	r.logger.Info("rss poller started", slog.Duration("interval", r.pollInterval))
 
-	ticker := time.NewTicker(PollInterval)
+	ticker := time.NewTicker(r.pollInterval)
 	defer ticker.Stop()
 
 	// Prune old seen items on startup

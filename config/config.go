@@ -27,14 +27,26 @@ type Config struct {
 	PresenceInterval time.Duration
 	LogLevel         slog.Level
 
+	// Timeouts
+	LavalinkTimeout         time.Duration
+	LavalinkLoadTimeout     time.Duration
+	HTTPClientTimeout       time.Duration
+	PanelPowerActionTimeout time.Duration
+
+	// RSS
+	RSSPollInterval time.Duration
+	RSSFeedTimeout  time.Duration
+
+	// URL Tools
+	XGDAPIKey      string
+	VTAPIKey       string
+	ShortenTimeout time.Duration
+	ScanTimeout    time.Duration
+
 	// Panel (Pelican)
 	PanelURL          string
 	PanelAPIKey       string
 	PanelAllowedUsers []snowflake.ID
-
-	// URL Tools
-	XGDAPIKey string
-	VTAPIKey  string
 }
 
 func Load() (*Config, error) {
@@ -110,9 +122,48 @@ func Load() (*Config, error) {
 	}
 	cfg.LogLevel = parseSlogLevel(logLevelStr)
 
+	// Timeouts
+	var lavalinkTimeout, lavalinkLoadTimeout, httpClientTimeout, panelPowerActionTimeout int
+	if err := lookupInt(value, "timeouts.lavalink", &lavalinkTimeout); err != nil {
+		return nil, err
+	}
+	if err := lookupInt(value, "timeouts.lavalinkLoad", &lavalinkLoadTimeout); err != nil {
+		return nil, err
+	}
+	if err := lookupInt(value, "timeouts.httpClient", &httpClientTimeout); err != nil {
+		return nil, err
+	}
+	if err := lookupInt(value, "timeouts.panelPowerAction", &panelPowerActionTimeout); err != nil {
+		return nil, err
+	}
+	cfg.LavalinkTimeout = time.Duration(lavalinkTimeout) * time.Second
+	cfg.LavalinkLoadTimeout = time.Duration(lavalinkLoadTimeout) * time.Second
+	cfg.HTTPClientTimeout = time.Duration(httpClientTimeout) * time.Second
+	cfg.PanelPowerActionTimeout = time.Duration(panelPowerActionTimeout) * time.Second
+
+	// RSS
+	var rssPollInterval, rssFeedTimeout int
+	if err := lookupInt(value, "rss.pollInterval", &rssPollInterval); err != nil {
+		return nil, err
+	}
+	if err := lookupInt(value, "rss.feedTimeout", &rssFeedTimeout); err != nil {
+		return nil, err
+	}
+	cfg.RSSPollInterval = time.Duration(rssPollInterval) * time.Second
+	cfg.RSSFeedTimeout = time.Duration(rssFeedTimeout) * time.Second
+
 	// URL Tools (optional)
 	cfg.XGDAPIKey = os.Getenv("XGD_API_KEY")
 	cfg.VTAPIKey = os.Getenv("VT_API_KEY")
+	var shortenTimeout, scanTimeout int
+	if err := lookupInt(value, "url.shortenTimeout", &shortenTimeout); err != nil {
+		return nil, err
+	}
+	if err := lookupInt(value, "url.scanTimeout", &scanTimeout); err != nil {
+		return nil, err
+	}
+	cfg.ShortenTimeout = time.Duration(shortenTimeout) * time.Second
+	cfg.ScanTimeout = time.Duration(scanTimeout) * time.Second
 
 	// Panel (optional)
 	cfg.PanelAPIKey = os.Getenv("PANEL_API_KEY")

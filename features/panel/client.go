@@ -23,9 +23,9 @@ type PelicanClient struct {
 	apiKey  string
 }
 
-func NewPelicanClient(baseURL, apiKey string) *PelicanClient {
+func NewPelicanClient(baseURL, apiKey string, timeout time.Duration) *PelicanClient {
 	return &PelicanClient{
-		http:    &http.Client{Timeout: 10 * time.Second},
+		http:    &http.Client{Timeout: timeout},
 		baseURL: strings.TrimRight(baseURL, "/"),
 		apiKey:  apiKey,
 	}

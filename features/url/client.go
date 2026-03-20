@@ -18,9 +18,9 @@ type URLClient struct {
 	vtKey  string
 }
 
-func NewURLClient(xgdKey, vtKey string) *URLClient {
+func NewURLClient(xgdKey, vtKey string, timeout time.Duration) *URLClient {
 	return &URLClient{
-		http:   &http.Client{Timeout: 10 * time.Second},
+		http:   &http.Client{Timeout: timeout},
 		xgdKey: xgdKey,
 		vtKey:  vtKey,
 	}
