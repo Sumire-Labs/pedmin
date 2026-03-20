@@ -57,7 +57,7 @@ func Load() (*Config, error) {
 		configPath = "./config.cue"
 	}
 
-	data, err := os.ReadFile(configPath)
+	data, err := os.ReadFile(configPath) // #nosec G304 G703 -- config path from trusted env var
 	if err != nil {
 		return nil, fmt.Errorf("failed to read config file %s: %w", configPath, err)
 	}

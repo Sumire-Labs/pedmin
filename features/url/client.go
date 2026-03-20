@@ -215,10 +215,10 @@ func (c *URLClient) vtWaitAnalysis(ctx context.Context, analysisID string) (*VTR
 		}
 
 		if err := json.NewDecoder(resp.Body).Decode(&result); err != nil {
-			resp.Body.Close()
+			_ = resp.Body.Close()
 			return nil, fmt.Errorf("failed to decode analysis response: %w", err)
 		}
-		resp.Body.Close()
+		_ = resp.Body.Close()
 
 		if result.Data.Attributes.Status == "completed" {
 			stats := result.Data.Attributes.Stats

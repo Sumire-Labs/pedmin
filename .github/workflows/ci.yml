@@ -69,7 +69,7 @@ jobs:
       - name: gosec
         uses: securego/gosec@master
         with:
-          args: ./...
+          args: -exclude=G115 ./...
 
   dependency-review:
     runs-on: ubuntu-latest

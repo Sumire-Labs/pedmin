@@ -88,7 +88,7 @@ func (c *PelicanClient) do(ctx context.Context, method, path string, body string
 
 	if resp.StatusCode >= 400 {
 		body, _ := io.ReadAll(resp.Body)
-		resp.Body.Close()
+		_ = resp.Body.Close()
 		switch resp.StatusCode {
 		case 401, 403:
 			return nil, fmt.Errorf("unauthorized (status %d): %s", resp.StatusCode, string(body))
@@ -202,7 +202,7 @@ func (c *PelicanClient) SendPowerAction(ctx context.Context, identifier, signal 
 	if err != nil {
 		return err
 	}
-	resp.Body.Close()
+	_ = resp.Body.Close()
 
 	if resp.StatusCode != http.StatusNoContent {
 		return fmt.Errorf("unexpected status code: %d", resp.StatusCode)
@@ -217,7 +217,7 @@ func (c *PelicanClient) SendCommand(ctx context.Context, identifier, command str
 	if err != nil {
 		return err
 	}
-	resp.Body.Close()
+	_ = resp.Body.Close()
 
 	if resp.StatusCode != http.StatusNoContent {
 		return fmt.Errorf("unexpected status code: %d", resp.StatusCode)
