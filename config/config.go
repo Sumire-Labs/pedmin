@@ -29,7 +29,6 @@ type Config struct {
 }
 
 func Load() (*Config, error) {
-	// 1. env secrets
 	token := os.Getenv("DISCORD_TOKEN")
 	if token == "" {
 		return nil, fmt.Errorf("DISCORD_TOKEN is required")
@@ -44,7 +43,6 @@ func Load() (*Config, error) {
 		return nil, fmt.Errorf("invalid DISCORD_APP_ID: %w", err)
 	}
 
-	// 2. CUE config
 	configPath := os.Getenv("CONFIG_PATH")
 	if configPath == "" {
 		configPath = "./config.cue"

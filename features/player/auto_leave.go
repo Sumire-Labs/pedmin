@@ -11,14 +11,12 @@ import (
 
 // OnVoiceStateUpdate implements module.VoiceStateListener.
 func (p *Player) OnVoiceStateUpdate(guildID, channelID, userID snowflake.ID) {
-	// Check if the bot is in a VC for this guild
 	botVoiceState, ok := p.client.Caches.VoiceState(guildID, p.client.ApplicationID)
 	if !ok || botVoiceState.ChannelID == nil {
 		return
 	}
 	botChannelID := *botVoiceState.ChannelID
 
-	// Count non-bot members in the bot's VC
 	memberCount := 0
 	for vs := range p.client.Caches.VoiceStates(guildID) {
 		if vs.ChannelID != nil && *vs.ChannelID == botChannelID && vs.UserID != p.client.ApplicationID {
@@ -44,7 +42,6 @@ func (p *Player) startAutoLeaveTimer(guildID snowflake.ID) {
 		p.logger.Info("auto-leaving voice channel due to inactivity", slog.Any("guild", guildID))
 		p.leaveTimers.Delete(guildID)
 
-		// Destroy player
 		if player := p.lavalink.ExistingPlayer(guildID); player != nil {
 			ctx, cancel := lavalinkCtx()
 			_ = player.Destroy(ctx)
@@ -52,13 +49,9 @@ func (p *Player) startAutoLeaveTimer(guildID snowflake.ID) {
 			p.lavalink.RemovePlayer(guildID)
 		}
 
-		// Disconnect from VC
 		_ = p.client.UpdateVoiceState(context.Background(), guildID, nil, false, false)
-
-		// Clear queue
 		p.queues.Delete(guildID)
 
-		// Update tracked message to show stopped state
 		val, ok := p.messages.Load(guildID)
 		if ok {
 			tracked := val.(trackedMessage)

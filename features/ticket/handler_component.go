@@ -1,12 +1,10 @@
 package ticket
 
 import (
-	"log/slog"
 	"strings"
 
 	"github.com/disgoorg/disgo/discord"
 	"github.com/disgoorg/disgo/events"
-	"github.com/disgoorg/snowflake/v2"
 )
 
 func (t *Ticket) handleComponent(e *events.ComponentInteractionCreate) {
@@ -24,110 +22,26 @@ func (t *Ticket) handleComponent(e *events.ComponentInteractionCreate) {
 
 	switch action {
 	case "category":
-		data := e.Data.(discord.ChannelSelectMenuInteractionData)
-		if len(data.Values) == 0 {
-			return
-		}
-		settings, err := LoadSettings(t.store, *guildID)
-		if err != nil {
-			t.logger.Error("failed to load settings", slog.Any("error", err))
-			return
-		}
-		settings.CategoryID = data.Values[0]
-		if err := SaveSettings(t.store, *guildID, settings); err != nil {
-			t.logger.Error("failed to save settings", slog.Any("error", err))
-		}
-		_ = e.DeferUpdateMessage()
-
+		t.handleCategorySelect(e, *guildID)
 	case "log_prompt":
-		_ = e.CreateMessage(discord.NewMessageCreateV2(
-			discord.NewContainer(
-				discord.NewTextDisplay("ログチャンネルを選択してください:"),
-				discord.NewActionRow(
-					discord.NewChannelSelectMenu(ModuleID+":log_channel", "ログチャンネルを選択...").
-						WithChannelTypes(discord.ChannelTypeGuildText),
-				),
-			),
-		).WithEphemeral(true))
-
+		t.handleLogPrompt(e)
 	case "log_channel":
-		data := e.Data.(discord.ChannelSelectMenuInteractionData)
-		if len(data.Values) == 0 {
-			return
-		}
-		settings, err := LoadSettings(t.store, *guildID)
-		if err != nil {
-			t.logger.Error("failed to load settings", slog.Any("error", err))
-			return
-		}
-		settings.LogChannelID = data.Values[0]
-		if err := SaveSettings(t.store, *guildID, settings); err != nil {
-			t.logger.Error("failed to save settings", slog.Any("error", err))
-		}
-		_ = e.DeferUpdateMessage()
-
+		t.handleLogChannelSelect(e, *guildID)
 	case "role_prompt":
-		_ = e.CreateMessage(discord.NewMessageCreateV2(
-			discord.NewContainer(
-				discord.NewTextDisplay("サポートロールを選択してください:"),
-				discord.NewActionRow(
-					discord.NewRoleSelectMenu(ModuleID+":role", "サポートロールを選択..."),
-				),
-			),
-		).WithEphemeral(true))
-
+		t.handleRolePrompt(e)
 	case "role":
-		data := e.Data.(discord.RoleSelectMenuInteractionData)
-		if len(data.Values) == 0 {
-			return
-		}
-		settings, err := LoadSettings(t.store, *guildID)
-		if err != nil {
-			t.logger.Error("failed to load settings", slog.Any("error", err))
-			return
-		}
-		settings.SupportRoleID = data.Values[0]
-		if err := SaveSettings(t.store, *guildID, settings); err != nil {
-			t.logger.Error("failed to save settings", slog.Any("error", err))
-		}
-		_ = e.DeferUpdateMessage()
-
+		t.handleRoleSelect(e, *guildID)
 	case "deploy_prompt":
-		_ = e.CreateMessage(discord.NewMessageCreateV2(
-			discord.NewContainer(
-				discord.NewTextDisplay("パネルを設置するチャンネルを選択してください:"),
-				discord.NewActionRow(
-					discord.NewChannelSelectMenu(ModuleID+":deploy_channel", "チャンネルを選択...").
-						WithChannelTypes(discord.ChannelTypeGuildText),
-				),
-			),
-		).WithEphemeral(true))
-
+		t.handleDeployPrompt(e)
 	case "deploy_channel":
-		data := e.Data.(discord.ChannelSelectMenuInteractionData)
-		if len(data.Values) == 0 {
-			return
-		}
-		channelID := data.Values[0]
-		_ = e.UpdateMessage(discord.NewMessageUpdateV2([]discord.LayoutComponent{
-			discord.NewContainer(
-				discord.NewTextDisplay("パネルを設置するチャンネル: <#"+channelID.String()+">"),
-				discord.NewActionRow(
-					discord.NewSuccessButton("設置する", ModuleID+":deploy_confirm:"+channelID.String()),
-					discord.NewSecondaryButton("キャンセル", ModuleID+":deploy_cancel"),
-				),
-			),
-		}))
-
+		t.handleDeployChannelSelect(e)
 	case "deploy_confirm":
 		if len(parts) < 3 {
 			return
 		}
 		t.handleDeployConfirm(e, parts[2])
-
 	case "deploy_cancel":
 		_ = e.DeferUpdateMessage()
-
 	case "create":
 		if !t.bot.IsModuleEnabled(*guildID, ModuleID) {
 			return
@@ -150,26 +64,9 @@ func (t *Ticket) handleComponent(e *events.ComponentInteractionCreate) {
 				),
 			},
 		})
-
 	case "close":
 		t.archiveTicket(e, *guildID)
-
 	case "delete":
 		t.deleteTicket(e, *guildID)
-	}
-}
-
-func (t *Ticket) handleDeployConfirm(e *events.ComponentInteractionCreate, channelIDStr string) {
-	_ = e.DeferUpdateMessage()
-
-	channelID, err := snowflake.Parse(channelIDStr)
-	if err != nil {
-		t.logger.Error("failed to parse channel ID", slog.Any("error", err))
-		return
-	}
-
-	panel := BuildTicketPanel()
-	if _, err := t.client.Rest.CreateMessage(channelID, panel); err != nil {
-		t.logger.Error("failed to deploy ticket panel", slog.Any("error", err))
 	}
 }

@@ -7,10 +7,8 @@ import (
 )
 
 func BuildFuckfetchUI(info *SystemInfo) discord.ContainerComponent {
-	// 1. Title
 	title := discord.NewTextDisplay("### 🖥️ fuckfetch")
 
-	// 2. OS block
 	osBlock := discord.NewTextDisplay(fmt.Sprintf(
 		"**OS:** %s (%s)\n**Kernel:** %s\n**Uptime:** %s",
 		info.OS,
@@ -19,7 +17,6 @@ func BuildFuckfetchUI(info *SystemInfo) discord.ContainerComponent {
 		formatUptime(info.Uptime),
 	))
 
-	// 3. CPU block
 	cpuBlock := discord.NewTextDisplay(fmt.Sprintf(
 		"**CPU:** %s (%dC/%dT)\n**Usage:** %s",
 		info.CPUModel,
@@ -28,7 +25,6 @@ func BuildFuckfetchUI(info *SystemInfo) discord.ContainerComponent {
 		buildBar(info.CPUUsage),
 	))
 
-	// 4. Memory block
 	memBlock := discord.NewTextDisplay(fmt.Sprintf(
 		"**RAM:** %s / %s %s\n**Swap:** %s / %s %s",
 		formatBytes(info.MemUsed),
@@ -39,7 +35,6 @@ func BuildFuckfetchUI(info *SystemInfo) discord.ContainerComponent {
 		buildBar(info.SwapUsage),
 	))
 
-	// 5. Disk + Network block
 	diskNetBlock := discord.NewTextDisplay(fmt.Sprintf(
 		"**Disk (/):** %s / %s %s\n**Net ↑:** %s  **Net ↓:** %s",
 		formatBytes(info.DiskUsed),
@@ -49,7 +44,6 @@ func BuildFuckfetchUI(info *SystemInfo) discord.ContainerComponent {
 		formatBytes(info.NetBytesRecv),
 	))
 
-	// 6. GPU / NPU block
 	gpuNpuBlock := discord.NewTextDisplay(fmt.Sprintf(
 		"**GPU:** %s\n**NPU:** %s",
 		info.GPUInfo,

@@ -141,7 +141,6 @@ func (r *RSS) handleDelete(e *events.ComponentInteractionCreate, feedIDStr strin
 		return
 	}
 
-	// Refresh the manage panel
 	feeds, err := r.store.GetRSSFeeds(*e.GuildID())
 	if err != nil {
 		r.logger.Error("failed to get feeds after delete", slog.Any("error", err))
