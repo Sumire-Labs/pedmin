@@ -8,6 +8,8 @@ RUN CGO_ENABLED=0 go build -o pedmin .
 
 FROM alpine:3.21
 
+RUN apk add --no-cache pciutils
+
 WORKDIR /app
 COPY --from=builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
 COPY --from=builder /app/pedmin .

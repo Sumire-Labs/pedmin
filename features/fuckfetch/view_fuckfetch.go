@@ -12,8 +12,7 @@ func BuildFuckfetchUI(info *SystemInfo) discord.ContainerComponent {
 
 	// 2. OS block
 	osBlock := discord.NewTextDisplay(fmt.Sprintf(
-		"**Hostname:** %s\n**OS:** %s (%s)\n**Kernel:** %s\n**Uptime:** %s",
-		info.Hostname,
+		"**OS:** %s (%s)\n**Kernel:** %s\n**Uptime:** %s",
 		info.OS,
 		info.Platform,
 		info.KernelVersion,

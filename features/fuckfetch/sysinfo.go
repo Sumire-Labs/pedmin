@@ -17,7 +17,7 @@ import (
 
 type SystemInfo struct {
 	// OS
-	Hostname, OS, Platform, KernelVersion string
+	OS, Platform, KernelVersion string
 	Uptime                                time.Duration
 	// CPU
 	CPUModel   string
@@ -48,7 +48,6 @@ func GatherSystemInfo() (*SystemInfo, error) {
 	if err != nil {
 		return nil, fmt.Errorf("host info: %w", err)
 	}
-	info.Hostname = hostInfo.Hostname
 	info.OS = hostInfo.OS
 	info.Platform = hostInfo.Platform + " " + hostInfo.PlatformVersion
 	info.KernelVersion = hostInfo.KernelVersion
@@ -121,35 +120,46 @@ func gatherGPUInfo() string {
 	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
 	defer cancel()
 
-	out, err := exec.CommandContext(ctx, "nvidia-smi",
-		"--query-gpu=name,memory.total,utilization.gpu",
-		"--format=csv,noheader,nounits",
-	).Output()
+	out, err := exec.CommandContext(ctx, "lspci").Output()
 	if err != nil {
 		return "N/A"
 	}
 
-	result := strings.TrimSpace(string(out))
-	if result == "" {
+	var gpus []string
+	for _, line := range strings.Split(string(out), "\n") {
+		if strings.Contains(line, "VGA") || strings.Contains(line, "3D controller") || strings.Contains(line, "Display controller") {
+			if idx := strings.Index(line, ": "); idx != -1 {
+				gpus = append(gpus, strings.TrimSpace(line[idx+2:]))
+			}
+		}
+	}
+	if len(gpus) == 0 {
 		return "N/A"
 	}
-	return result
+	return strings.Join(gpus, "\n")
 }
 
 func gatherNPUInfo() string {
 	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
 	defer cancel()
 
-	out, err := exec.CommandContext(ctx, "ls", "/sys/class/accel").Output()
+	out, err := exec.CommandContext(ctx, "lspci").Output()
 	if err != nil {
 		return "N/A"
 	}
 
-	result := strings.TrimSpace(string(out))
-	if result == "" {
+	var npus []string
+	for _, line := range strings.Split(string(out), "\n") {
+		if strings.Contains(line, "Processing accelerators") || strings.Contains(line, "accel") {
+			if idx := strings.Index(line, ": "); idx != -1 {
+				npus = append(npus, strings.TrimSpace(line[idx+2:]))
+			}
+		}
+	}
+	if len(npus) == 0 {
 		return "N/A"
 	}
-	return result
+	return strings.Join(npus, "\n")
 }
 
 func formatBytes(bytes uint64) string {
@@ -174,7 +184,7 @@ func buildBar(percent float64) string {
 	if filled < 0 {
 		filled = 0
 	}
-	return strings.Repeat("▓", filled) + strings.Repeat("░", total-filled) + fmt.Sprintf(" %.1f%%", percent)
+	return strings.Repeat("🟢", filled) + strings.Repeat("⚫", total-filled) + fmt.Sprintf(" %.1f%%", percent)
 }
 
 func formatUptime(d time.Duration) string {

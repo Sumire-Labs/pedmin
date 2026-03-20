@@ -34,3 +34,5 @@ services:
     volumes:
       - ./data:/app/data
       - ./config.cue:/app/config.cue:ro
+      - /sys/bus/pci:/sys/bus/pci:ro
+      - /sys/devices:/sys/devices:ro
