@@ -11,7 +11,8 @@ import (
 
 func (t *Ticket) handleComponent(e *events.ComponentInteractionCreate) {
 	customID := e.Data.CustomID()
-	_, action, _ := strings.Cut(customID, ":")
+	parts := strings.SplitN(customID, ":", 3)
+	action := parts[1]
 
 	guildID := e.GuildID()
 	if guildID == nil {
@@ -116,7 +117,6 @@ func (t *Ticket) handleComponent(e *events.ComponentInteractionCreate) {
 		}))
 
 	case "deploy_confirm":
-		parts := strings.SplitN(customID, ":", 3)
 		if len(parts) < 3 {
 			return
 		}
