@@ -15,6 +15,7 @@ import (
 	loggermod "github.com/s12kuma01/pedmin/features/logger"
 	"github.com/s12kuma01/pedmin/features/ping"
 	"github.com/s12kuma01/pedmin/features/player"
+	rssmod "github.com/s12kuma01/pedmin/features/rss"
 	"github.com/s12kuma01/pedmin/features/settings"
 	ticketmod "github.com/s12kuma01/pedmin/features/ticket"
 	"github.com/s12kuma01/pedmin/store"
@@ -61,6 +62,9 @@ func main() {
 	loggermod.SetupListeners(b.Client, loggerModule)
 	b.Register(loggerModule)
 
+	rssModule := rssmod.New(b, b.Client, guildStore, logger)
+	b.Register(rssModule)
+
 	playerModule := player.New(b.Lavalink, b.Client, cfg.DefaultVolume, cfg.AutoLeaveTimeout, logger)
 	player.SetupListeners(b.Lavalink, playerModule)
 	b.Register(playerModule)
@@ -81,12 +85,15 @@ func main() {
 	}
 	logger.Info("pedmin is online")
 
+	rssModule.StartPoller(context.Background())
+
 	// Graceful shutdown
 	sig := make(chan os.Signal, 1)
 	signal.Notify(sig, syscall.SIGINT, syscall.SIGTERM)
 	<-sig
 
 	logger.Info("shutting down...")
+	rssModule.StopPoller()
 	b.Close(context.Background())
 	_ = guildStore.Close()
 }

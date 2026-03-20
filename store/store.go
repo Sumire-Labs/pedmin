@@ -23,6 +23,15 @@ type Ticket struct {
 	ClosedBy  *snowflake.ID
 }
 
+type RSSFeed struct {
+	ID        int64
+	GuildID   snowflake.ID
+	URL       string
+	ChannelID snowflake.ID
+	Title     string
+	AddedAt   time.Time
+}
+
 type GuildStore interface {
 	Get(guildID snowflake.ID) (*GuildSettings, error)
 	Save(settings *GuildSettings) error
@@ -34,5 +43,13 @@ type GuildStore interface {
 	GetTicketByChannel(channelID snowflake.ID) (*Ticket, error)
 	CloseTicket(channelID snowflake.ID, closedBy snowflake.ID) error
 	DeleteTicket(channelID snowflake.ID) error
+	CreateRSSFeed(feed *RSSFeed) error
+	DeleteRSSFeed(id int64, guildID snowflake.ID) error
+	GetRSSFeeds(guildID snowflake.ID) ([]RSSFeed, error)
+	GetAllRSSFeeds() ([]RSSFeed, error)
+	CountRSSFeeds(guildID snowflake.ID) (int, error)
+	IsItemSeen(feedID int64, itemHash string) (bool, error)
+	MarkItemsSeen(feedID int64, itemHashes []string) error
+	PruneSeenItems(olderThan time.Time) error
 	Close() error
 }
