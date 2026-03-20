@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"time"
 
 	"github.com/disgoorg/snowflake/v2"
 	_ "modernc.org/sqlite"
@@ -31,6 +32,23 @@ var migrations = []struct {
 				settings   TEXT    NOT NULL DEFAULT '{}',
 				PRIMARY KEY (guild_id, module_id)
 			);
+		`,
+	},
+	{
+		version: 2,
+		sql: `
+			CREATE TABLE IF NOT EXISTS tickets (
+				guild_id   INTEGER NOT NULL,
+				number     INTEGER NOT NULL,
+				channel_id INTEGER NOT NULL,
+				user_id    INTEGER NOT NULL,
+				subject    TEXT    NOT NULL DEFAULT '',
+				created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+				closed_at  TIMESTAMP,
+				closed_by  INTEGER,
+				PRIMARY KEY (guild_id, number)
+			);
+			CREATE INDEX IF NOT EXISTS idx_tickets_channel ON tickets (channel_id);
 		`,
 	},
 }
@@ -237,6 +255,57 @@ func (s *SQLiteStore) SetModuleSettings(guildID snowflake.ID, moduleID string, s
 		 ON CONFLICT(guild_id, module_id) DO UPDATE SET settings = excluded.settings`,
 		int64(guildID), moduleID, settings,
 	)
+	return err
+}
+
+func (s *SQLiteStore) CreateTicket(guildID snowflake.ID, number int, channelID, userID snowflake.ID, subject string) error {
+	_, err := s.db.Exec(
+		"INSERT INTO tickets (guild_id, number, channel_id, user_id, subject) VALUES (?, ?, ?, ?, ?)",
+		int64(guildID), number, int64(channelID), int64(userID), subject,
+	)
+	return err
+}
+
+func (s *SQLiteStore) GetTicketByChannel(channelID snowflake.ID) (*Ticket, error) {
+	var t Ticket
+	var guildID, chID, userID int64
+	var closedAt sql.NullTime
+	var closedBy sql.NullInt64
+
+	err := s.db.QueryRow(
+		"SELECT guild_id, number, channel_id, user_id, subject, created_at, closed_at, closed_by FROM tickets WHERE channel_id = ?",
+		int64(channelID),
+	).Scan(&guildID, &t.Number, &chID, &userID, &t.Subject, &t.CreatedAt, &closedAt, &closedBy)
+	if err == sql.ErrNoRows {
+		return nil, nil
+	}
+	if err != nil {
+		return nil, err
+	}
+
+	t.GuildID = snowflake.ID(guildID)
+	t.ChannelID = snowflake.ID(chID)
+	t.UserID = snowflake.ID(userID)
+	if closedAt.Valid {
+		t.ClosedAt = &closedAt.Time
+	}
+	if closedBy.Valid {
+		id := snowflake.ID(closedBy.Int64)
+		t.ClosedBy = &id
+	}
+	return &t, nil
+}
+
+func (s *SQLiteStore) CloseTicket(channelID snowflake.ID, closedBy snowflake.ID) error {
+	_, err := s.db.Exec(
+		"UPDATE tickets SET closed_at = ?, closed_by = ? WHERE channel_id = ?",
+		time.Now().UTC(), int64(closedBy), int64(channelID),
+	)
+	return err
+}
+
+func (s *SQLiteStore) DeleteTicket(channelID snowflake.ID) error {
+	_, err := s.db.Exec("DELETE FROM tickets WHERE channel_id = ?", int64(channelID))
 	return err
 }
 

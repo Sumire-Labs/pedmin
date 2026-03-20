@@ -16,6 +16,7 @@ import (
 	"github.com/s12kuma01/pedmin/features/ping"
 	"github.com/s12kuma01/pedmin/features/player"
 	"github.com/s12kuma01/pedmin/features/settings"
+	ticketmod "github.com/s12kuma01/pedmin/features/ticket"
 	"github.com/s12kuma01/pedmin/store"
 )
 
@@ -52,6 +53,9 @@ func main() {
 
 	fuckfetchModule := fuckfetch.New(logger)
 	b.Register(fuckfetchModule)
+
+	ticketModule := ticketmod.New(b, b.Client, guildStore, logger)
+	b.Register(ticketModule)
 
 	loggerModule := loggermod.New(b, b.Client, guildStore, logger)
 	loggermod.SetupListeners(b.Client, loggerModule)

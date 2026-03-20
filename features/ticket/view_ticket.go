@@ -1,0 +1,43 @@
+package ticket
+
+import (
+	"fmt"
+
+	"github.com/disgoorg/disgo/discord"
+	"github.com/disgoorg/snowflake/v2"
+)
+
+func BuildTicketInfo(number int, userID snowflake.ID, subject, description string) discord.MessageCreate {
+	body := fmt.Sprintf("**作成者:** <@%d>\n**件名:** %s", userID, subject)
+	if description != "" {
+		body += "\n\n" + description
+	}
+
+	return discord.NewMessageCreateV2(
+		discord.NewContainer(
+			discord.NewTextDisplay(fmt.Sprintf("## 🎫 チケット #%04d", number)),
+			discord.NewSmallSeparator(),
+			discord.NewTextDisplay(body),
+			discord.NewLargeSeparator(),
+			discord.NewActionRow(
+				discord.NewDangerButton("チケットを閉じる", ModuleID+":close"),
+			),
+		).WithAccentColor(0x3498DB),
+	).WithAllowedMentions(&discord.AllowedMentions{})
+}
+
+func BuildArchiveInfo(number int, userID snowflake.ID, subject string) discord.MessageCreate {
+	body := fmt.Sprintf("**作成者:** <@%d>\n**件名:** %s\n\nこのチケットはクローズされました。", userID, subject)
+
+	return discord.NewMessageCreateV2(
+		discord.NewContainer(
+			discord.NewTextDisplay(fmt.Sprintf("## 🔒 チケット #%04d (アーカイブ)", number)),
+			discord.NewSmallSeparator(),
+			discord.NewTextDisplay(body),
+			discord.NewLargeSeparator(),
+			discord.NewActionRow(
+				discord.NewDangerButton("チケットを削除", ModuleID+":delete"),
+			),
+		).WithAccentColor(0x95A5A6),
+	).WithAllowedMentions(&discord.AllowedMentions{})
+}
