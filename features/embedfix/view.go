@@ -1,0 +1,70 @@
+package embedfix
+
+import (
+	"fmt"
+
+	"github.com/disgoorg/disgo/discord"
+)
+
+func BuildTweetEmbed(tweet *Tweet, ref tweetRef) discord.MessageCreate {
+	components := buildTweetComponents(tweet, ref, tweet.Text, "")
+	return discord.NewMessageCreateV2(discord.NewContainer(components...))
+}
+
+func BuildTweetEmbedTranslated(tweet *Tweet, result *TranslateResult, ref tweetRef) []discord.LayoutComponent {
+	footer := fmt.Sprintf("𝕏 · %s · %sから翻訳", relativeTime(tweet.CreatedAt), langName(result.DetectedLanguage))
+	components := buildTweetComponents(tweet, ref, result.TranslatedText, footer)
+	return []discord.LayoutComponent{discord.NewContainer(components...)}
+}
+
+func buildTweetComponents(tweet *Tweet, ref tweetRef, text, footerOverride string) []discord.ContainerSubComponent {
+	components := []discord.ContainerSubComponent{
+		discord.NewSection(
+			discord.NewTextDisplay(fmt.Sprintf("**%s** @%s", tweet.Author.Name, tweet.Author.ScreenName)),
+		).WithAccessory(discord.NewThumbnail(tweet.Author.AvatarURL)),
+		discord.NewSmallSeparator(),
+		discord.NewTextDisplay(text),
+	}
+
+	if len(tweet.Media) > 0 {
+		items := make([]discord.MediaGalleryItem, 0, len(tweet.Media))
+		for _, m := range tweet.Media {
+			mediaURL := m.URL
+			if m.Type == "video" && m.ThumbnailURL != "" {
+				mediaURL = m.ThumbnailURL
+			}
+			items = append(items, discord.MediaGalleryItem{
+				Media: discord.UnfurledMediaItem{URL: mediaURL},
+			})
+		}
+		components = append(components, discord.NewMediaGallery(items...))
+	}
+
+	components = append(components, discord.NewSmallSeparator())
+
+	stats := fmt.Sprintf("%s %s  %s %s  %s %s  %s %s",
+		emojiMessages, formatCount(tweet.Replies),
+		emojiRepost, formatCount(tweet.Retweets),
+		emojiLike, formatCount(tweet.Likes),
+		emojiGraph, formatCount(tweet.Views),
+	)
+	components = append(components, discord.NewTextDisplay(stats))
+
+	footer := fmt.Sprintf("𝕏 · %s", relativeTime(tweet.CreatedAt))
+	if footerOverride != "" {
+		footer = footerOverride
+	}
+	components = append(components, discord.NewTextDisplay(footer))
+
+	// Show translate button only for non-Japanese tweets and when not already translated
+	if tweet.Lang != "ja" && footerOverride == "" {
+		customID := fmt.Sprintf("%s:translate:%s:%s", ModuleID, ref.ScreenName, ref.TweetID)
+		components = append(components,
+			discord.NewActionRow(
+				discord.NewSecondaryButton("🌐 翻訳", customID),
+			),
+		)
+	}
+
+	return components
+}

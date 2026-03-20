@@ -12,6 +12,7 @@ import (
 	"github.com/s12kuma01/pedmin/config"
 	"github.com/s12kuma01/pedmin/features/avatar"
 	"github.com/s12kuma01/pedmin/features/fuckfetch"
+	"github.com/s12kuma01/pedmin/features/embedfix"
 	loggermod "github.com/s12kuma01/pedmin/features/logger"
 	panelmod "github.com/s12kuma01/pedmin/features/panel"
 	urlmod "github.com/s12kuma01/pedmin/features/url"
@@ -62,6 +63,10 @@ func main() {
 	loggerModule := loggermod.New(b, b.Client, guildStore, logger)
 	loggermod.SetupListeners(b.Client, loggerModule)
 	b.Register(loggerModule)
+
+	embedfixModule := embedfix.New(b, b.Client, cfg.DeepLAPIKey, cfg.HTTPClientTimeout, logger)
+	embedfix.SetupListeners(b.Client, embedfixModule)
+	b.Register(embedfixModule)
 
 	rssModule := rssmod.New(b, b.Client, guildStore, cfg.RSSPollInterval, cfg.RSSFeedTimeout, logger)
 	b.Register(rssModule)

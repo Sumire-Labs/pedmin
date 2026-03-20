@@ -57,6 +57,13 @@ features/avatar/
 ├── module.go                  # Info, Commands
 ├── handler_command.go         # /avatar command, user resolve
 └── view_avatar.go             # Avatar MediaGallery builder
+features/embedfix/
+├── module.go              # Info, Bot deps, module interface
+├── listener.go            # GuildMessageCreate handler, URL detection
+├── handler_component.go   # Translate button dispatch
+├── client.go              # fxtwitter + Google Translate HTTP clients
+├── view.go                # Tweet embed UI builder
+└── view_helpers.go        # Relative time, number format, URL regex
 features/fuckfetch/
 ├── module.go                  # Info, Commands
 ├── handler_command.go         # /fuckfetch command
