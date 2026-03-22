@@ -46,6 +46,7 @@ func New(cfg *config.Config, guildStore store.GuildStore, logger *slog.Logger) (
 				gateway.IntentGuildMembers,
 				gateway.IntentGuildModeration,
 				gateway.IntentMessageContent,
+				gateway.IntentGuildMessageReactions,
 			),
 		),
 		disgobot.WithEventListenerFunc(b.onCommandInteraction),

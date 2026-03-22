@@ -20,6 +20,7 @@ import (
 	rssmod "github.com/s12kuma01/pedmin/features/rss"
 	"github.com/s12kuma01/pedmin/features/settings"
 	ticketmod "github.com/s12kuma01/pedmin/features/ticket"
+	translatormod "github.com/s12kuma01/pedmin/features/translator"
 	urlmod "github.com/s12kuma01/pedmin/features/url"
 	"github.com/s12kuma01/pedmin/store"
 )
@@ -67,6 +68,10 @@ func main() {
 	embedfixModule := embedfix.New(b, b.Client, cfg.DeepLAPIKey, cfg.MetaAccessToken, cfg.HTTPClientTimeout, guildStore, logger)
 	embedfix.SetupListeners(b.Client, embedfixModule)
 	b.Register(embedfixModule)
+
+	translatorModule := translatormod.New(b, b.Client, cfg.DeepLAPIKey, cfg.HTTPClientTimeout, logger)
+	translatormod.SetupListeners(b.Client, translatorModule)
+	b.Register(translatorModule)
 
 	rssModule := rssmod.New(b, b.Client, guildStore, cfg.RSSPollInterval, cfg.RSSFeedTimeout, logger)
 	b.Register(rssModule)
