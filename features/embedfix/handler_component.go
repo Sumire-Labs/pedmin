@@ -2,6 +2,7 @@ package embedfix
 
 import (
 	"context"
+	"log/slog"
 	"strings"
 
 	"github.com/disgoorg/disgo/discord"
@@ -12,10 +13,16 @@ func (ef *EmbedFix) handleComponent(e *events.ComponentInteractionCreate) {
 	customID := e.Data.CustomID()
 	_, rest, _ := strings.Cut(customID, ":")
 	action, rest, _ := strings.Cut(rest, ":")
-	if action != "translate" {
-		return
-	}
 
+	switch action {
+	case "translate":
+		ef.handleTranslate(e, rest)
+	case "platforms":
+		ef.handlePlatformSettings(e)
+	}
+}
+
+func (ef *EmbedFix) handleTranslate(e *events.ComponentInteractionCreate, rest string) {
 	_ = e.DeferUpdateMessage()
 
 	if ef.translateClient.apiKey == "" {
@@ -34,6 +41,38 @@ func (ef *EmbedFix) handleComponent(e *events.ComponentInteractionCreate) {
 
 	_, _ = e.Client().Rest.UpdateInteractionResponse(e.ApplicationID(), e.Token(),
 		discord.NewMessageUpdateV2(ui))
+}
+
+func (ef *EmbedFix) handlePlatformSettings(e *events.ComponentInteractionCreate) {
+	guildID := e.GuildID()
+	if guildID == nil {
+		return
+	}
+
+	data, ok := e.Data.(discord.StringSelectMenuInteractionData)
+	if !ok {
+		return
+	}
+
+	settings, err := LoadSettings(ef.store, *guildID)
+	if err != nil {
+		ef.logger.Error("failed to load embedfix settings", slog.Any("error", err))
+		return
+	}
+
+	// Disable all, then enable selected
+	for k := range settings.Platforms {
+		settings.Platforms[k] = false
+	}
+	for _, v := range data.Values {
+		settings.Platforms[Platform(v)] = true
+	}
+
+	if err := SaveSettings(ef.store, *guildID, settings); err != nil {
+		ef.logger.Error("failed to save embedfix settings", slog.Any("error", err))
+	}
+
+	_ = e.DeferUpdateMessage()
 }
 
 func (ef *EmbedFix) respondTranslateError(e *events.ComponentInteractionCreate, msg string) {

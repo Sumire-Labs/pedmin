@@ -16,6 +16,23 @@ func (ef *EmbedFix) processMessageURLs(ctx context.Context, e *events.GuildMessa
 		return
 	}
 
+	settings, err := LoadSettings(ef.store, e.GuildID)
+	if err != nil {
+		ef.logger.Error("failed to load embedfix settings", slog.Any("error", err))
+		settings = defaultSettings()
+	}
+
+	// Filter refs by enabled platforms
+	var enabledRefs []EmbedRef
+	for _, ref := range refs {
+		if settings.IsPlatformEnabled(ref.Platform) {
+			enabledRefs = append(enabledRefs, ref)
+		}
+	}
+	if len(enabledRefs) == 0 {
+		return
+	}
+
 	// Suppress embeds on the original message (best-effort)
 	if _, err := ef.client.Rest.UpdateMessage(e.ChannelID, e.MessageID,
 		discord.NewMessageUpdate().WithSuppressEmbeds(true)); err != nil {
@@ -25,7 +42,7 @@ func (ef *EmbedFix) processMessageURLs(ctx context.Context, e *events.GuildMessa
 		)
 	}
 
-	for _, ref := range refs {
+	for _, ref := range enabledRefs {
 		switch ref.Platform {
 		case PlatformTwitter:
 			ef.processTwitterEmbed(ctx, e, ref)

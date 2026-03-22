@@ -9,6 +9,7 @@ import (
 	"github.com/disgoorg/disgo/events"
 	"github.com/disgoorg/snowflake/v2"
 	"github.com/s12kuma01/pedmin/module"
+	"github.com/s12kuma01/pedmin/store"
 )
 
 const ModuleID = "embedfix"
@@ -20,6 +21,7 @@ type Bot interface {
 type EmbedFix struct {
 	bot             Bot
 	client          *disgobot.Client
+	store           store.GuildStore
 	twitterClient   *FxTwitterClient
 	redditClient    *RedditClient
 	tiktokClient    *TikTokClient
@@ -28,10 +30,11 @@ type EmbedFix struct {
 	logger          *slog.Logger
 }
 
-func New(bot Bot, client *disgobot.Client, deeplAPIKey string, metaAccessToken string, timeout time.Duration, logger *slog.Logger) *EmbedFix {
+func New(bot Bot, client *disgobot.Client, deeplAPIKey string, metaAccessToken string, timeout time.Duration, guildStore store.GuildStore, logger *slog.Logger) *EmbedFix {
 	return &EmbedFix{
 		bot:             bot,
 		client:          client,
+		store:           guildStore,
 		twitterClient:   NewFxTwitterClient(timeout),
 		redditClient:    NewRedditClient(timeout),
 		tiktokClient:    NewTikTokClient(timeout),
@@ -62,8 +65,13 @@ func (ef *EmbedFix) HandleComponent(e *events.ComponentInteractionCreate) {
 
 func (ef *EmbedFix) HandleModal(_ *events.ModalSubmitInteractionCreate) {}
 
-func (ef *EmbedFix) SettingsPanel(_ snowflake.ID) []discord.LayoutComponent {
-	return nil
+func (ef *EmbedFix) SettingsPanel(guildID snowflake.ID) []discord.LayoutComponent {
+	settings, err := LoadSettings(ef.store, guildID)
+	if err != nil {
+		ef.logger.Error("failed to load embedfix settings", slog.Any("error", err))
+		settings = defaultSettings()
+	}
+	return BuildSettingsPanel(settings)
 }
 
 func (ef *EmbedFix) HandleSettingsComponent(_ *events.ComponentInteractionCreate) {}
