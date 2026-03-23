@@ -1,3 +1,6 @@
+// opyright (c) 2025-2026 s12kuma01
+// SPDX-License-Identifier: MPL-2.0
+
 // Package repository defines the GuildStore persistence interface and generic helpers.
 package repository
 

@@ -1,3 +1,6 @@
+// opyright (c) 2025-2026 s12kuma01
+// SPDX-License-Identifier: MPL-2.0
+
 // Package deepl provides a client for the DeepL translation API.
 package deepl
 
