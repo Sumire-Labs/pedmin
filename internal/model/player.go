@@ -1,7 +1,8 @@
 package model
 
 import (
-	"math/rand/v2"
+	"crypto/rand"
+	"math/big"
 	"sync"
 
 	"github.com/disgoorg/disgolink/v3/lavalink"
@@ -177,7 +178,8 @@ func (q *Queue) Shuffle() {
 	}
 
 	for i := len(rest) - 1; i > 0; i-- {
-		j := rand.IntN(i + 1)
+		n, _ := rand.Int(rand.Reader, big.NewInt(int64(i+1)))
+		j := int(n.Int64())
 		rest[i], rest[j] = rest[j], rest[i]
 	}
 
