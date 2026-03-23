@@ -1,6 +1,7 @@
 package player
 
 import (
+	"math/rand/v2"
 	"sync"
 
 	"github.com/disgoorg/disgolink/v3/lavalink"
@@ -119,4 +120,31 @@ func (q *Queue) CycleLoop() LoopMode {
 	defer q.mu.Unlock()
 	q.loop = q.loop.Next()
 	return q.loop
+}
+
+// Shuffle randomizes the order of tracks in the queue while keeping the
+// currently playing track at position 0.
+func (q *Queue) Shuffle() {
+	q.mu.Lock()
+	defer q.mu.Unlock()
+
+	if len(q.tracks) <= 1 {
+		return
+	}
+
+	currentTrack := q.tracks[q.current]
+	rest := make([]lavalink.Track, 0, len(q.tracks)-1)
+	for i, t := range q.tracks {
+		if i != q.current {
+			rest = append(rest, t)
+		}
+	}
+
+	for i := len(rest) - 1; i > 0; i-- {
+		j := rand.IntN(i + 1)
+		rest[i], rest[j] = rest[j], rest[i]
+	}
+
+	q.tracks = append([]lavalink.Track{currentTrack}, rest...)
+	q.current = 0
 }

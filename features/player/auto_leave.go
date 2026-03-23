@@ -41,6 +41,7 @@ func (p *Player) startAutoLeaveTimer(guildID snowflake.ID) {
 	timer := time.AfterFunc(p.autoLeaveTimeout, func() {
 		p.logger.Info("auto-leaving voice channel due to inactivity", slog.Any("guild", guildID))
 		p.leaveTimers.Delete(guildID)
+		p.stopProgressTicker(guildID)
 
 		if player := p.lavalink.ExistingPlayer(guildID); player != nil {
 			ctx, cancel := p.lavalinkCtx()

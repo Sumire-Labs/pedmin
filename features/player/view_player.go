@@ -15,7 +15,7 @@ func BuildPlayerUI(player disgolink.Player, queue *Queue) discord.ContainerCompo
 
 	info := track.Info
 
-	return discord.NewContainer(
+	components := []discord.ContainerSubComponent{
 		discord.NewSection(
 			discord.NewTextDisplay("### ▶️ 再生中"),
 			discord.NewTextDisplay(fmt.Sprintf("**%s**\nby %s", info.Title, info.Author)),
@@ -29,20 +29,22 @@ func BuildPlayerUI(player disgolink.Player, queue *Queue) discord.ContainerCompo
 			queue.LoopMode().String(),
 		)),
 		discord.NewLargeSeparator(),
-		buildButtonRow(queue.LoopMode()),
-	)
+	}
+	components = append(components, buildButtonRows(queue.LoopMode())...)
+	return discord.NewContainer(components...)
 }
 
 func buildIdleUI(queue *Queue) discord.ContainerComponent {
-	return discord.NewContainer(
+	components := []discord.ContainerSubComponent{
 		discord.NewTextDisplay("### Pedmin Player"),
 		discord.NewTextDisplay("再生中の曲はありません。ボタンから曲を追加してください！"),
 		discord.NewLargeSeparator(),
-		buildButtonRow(queue.LoopMode()),
-	)
+	}
+	components = append(components, buildButtonRows(queue.LoopMode())...)
+	return discord.NewContainer(components...)
 }
 
-func buildButtonRow(loopMode LoopMode) discord.ActionRowComponent {
+func buildButtonRows(loopMode LoopMode) []discord.ContainerSubComponent {
 	modeLabel := "モード"
 	switch loopMode {
 	case LoopTrack:
@@ -51,11 +53,18 @@ func buildButtonRow(loopMode LoopMode) discord.ActionRowComponent {
 		modeLabel = "モード: キュー"
 	}
 
-	return discord.NewActionRow(
-		discord.NewSecondaryButton("スキップ", ModuleID+":skip"),
-		discord.NewDangerButton("停止", ModuleID+":stop"),
-		discord.NewSecondaryButton("キュー", ModuleID+":queue"),
-		discord.NewSuccessButton("追加", ModuleID+":add"),
-		discord.NewSecondaryButton(modeLabel, ModuleID+":loop"),
-	)
+	return []discord.ContainerSubComponent{
+		discord.NewActionRow(
+			discord.NewSecondaryButton("⏪", ModuleID+":seek_back"),
+			discord.NewSecondaryButton("スキップ", ModuleID+":skip"),
+			discord.NewDangerButton("停止", ModuleID+":stop"),
+			discord.NewSecondaryButton("⏩", ModuleID+":seek_forward"),
+			discord.NewSuccessButton("追加", ModuleID+":add"),
+		),
+		discord.NewActionRow(
+			discord.NewSecondaryButton("🔀 シャッフル", ModuleID+":shuffle"),
+			discord.NewSecondaryButton("キュー", ModuleID+":queue"),
+			discord.NewSecondaryButton(modeLabel, ModuleID+":loop"),
+		),
+	}
 }

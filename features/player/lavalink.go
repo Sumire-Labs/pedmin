@@ -23,6 +23,7 @@ func (p *Player) onTrackStart(player disgolink.Player, event lavalink.TrackStart
 		slog.String("title", event.Track.Info.Title),
 		slog.Int64("guild", int64(event.GuildID())),
 	)
+	p.startProgressTicker(event.GuildID())
 	p.updatePlayerMessage(player)
 }
 
@@ -34,6 +35,7 @@ func (p *Player) onTrackEnd(player disgolink.Player, event lavalink.TrackEndEven
 	queue := p.queues.Get(event.GuildID())
 	next, ok := queue.Next()
 	if !ok {
+		p.stopProgressTicker(event.GuildID())
 		p.updatePlayerMessage(player)
 		return
 	}

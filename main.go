@@ -108,6 +108,7 @@ func main() {
 	<-sig
 
 	logger.Info("shutting down...")
+	playerModule.Shutdown()
 	rssModule.StopPoller()
 	b.Close(context.Background())
 	if err := guildStore.Close(); err != nil {

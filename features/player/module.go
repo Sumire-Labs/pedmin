@@ -32,6 +32,7 @@ type Player struct {
 	lavalinkTimeout     time.Duration
 	lavalinkLoadTimeout time.Duration
 	leaveTimers         sync.Map // map[snowflake.ID]*time.Timer
+	progressTickers     sync.Map // map[snowflake.ID]context.CancelFunc
 	logger              *slog.Logger
 }
 
@@ -84,4 +85,9 @@ func (p *Player) SettingsSummary(guildID snowflake.ID) string {
 func (p *Player) SettingsPanel(guildID snowflake.ID) []discord.LayoutComponent {
 	vol := p.getDefaultVolume(guildID)
 	return BuildSettingsPanel(vol)
+}
+
+// Shutdown stops all background goroutines. Call during graceful shutdown.
+func (p *Player) Shutdown() {
+	p.stopAllProgressTickers()
 }

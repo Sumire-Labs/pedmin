@@ -2,9 +2,11 @@ package player
 
 import (
 	"context"
+	"fmt"
 	"log/slog"
 	"strings"
 
+	"github.com/disgoorg/disgo/discord"
 	"github.com/disgoorg/disgo/events"
 	"github.com/disgoorg/disgolink/v3/disgolink"
 	"github.com/disgoorg/disgolink/v3/lavalink"
@@ -23,6 +25,7 @@ func (p *Player) loadAndPlay(e *events.ModalSubmitInteractionCreate, guildID sno
 	node := p.lavalink.BestNode()
 	if node == nil {
 		p.logger.Error("no lavalink node available")
+		p.sendLoadFollowup(e, "❌ 音楽サーバーに接続できません。")
 		return
 	}
 
@@ -31,9 +34,11 @@ func (p *Player) loadAndPlay(e *events.ModalSubmitInteractionCreate, guildID sno
 	node.LoadTracksHandler(loadCtx, query, disgolink.NewResultHandler(
 		func(track lavalink.Track) {
 			p.playTrack(e, guildID, track)
+			p.sendLoadFollowup(e, fmt.Sprintf("🎵 キューに追加: **%s**", track.Info.Title))
 		},
 		func(playlist lavalink.Playlist) {
 			if len(playlist.Tracks) == 0 {
+				p.sendLoadFollowup(e, "❌ プレイリストにトラックがありません。")
 				return
 			}
 			queue := p.queues.Get(guildID)
@@ -45,20 +50,34 @@ func (p *Player) loadAndPlay(e *events.ModalSubmitInteractionCreate, guildID sno
 			ctx, cancel := p.lavalinkCtx()
 			_ = player.Update(ctx, lavalink.WithTrack(playlist.Tracks[0]))
 			cancel()
+			p.sendLoadFollowup(e, fmt.Sprintf("🎵 プレイリストから %d 曲を追加しました", len(playlist.Tracks)))
 		},
 		func(tracks []lavalink.Track) {
 			if len(tracks) == 0 {
+				p.sendLoadFollowup(e, "❌ 検索結果が見つかりません。")
 				return
 			}
 			p.playTrack(e, guildID, tracks[0])
+			p.sendLoadFollowup(e, fmt.Sprintf("🎵 キューに追加: **%s**", tracks[0].Info.Title))
 		},
 		func() {
 			p.logger.Info("no matches found", slog.String("query", query))
+			p.sendLoadFollowup(e, "❌ 検索結果が見つかりません。")
 		},
 		func(err error) {
 			p.logger.Error("load failed", slog.Any("error", err))
+			p.sendLoadFollowup(e, "❌ トラックの読み込みに失敗しました。")
 		},
 	))
+}
+
+func (p *Player) sendLoadFollowup(e *events.ModalSubmitInteractionCreate, text string) {
+	_, _ = e.Client().Rest.UpdateInteractionResponse(
+		e.ApplicationID(), e.Token(),
+		discord.NewMessageUpdateV2([]discord.LayoutComponent{
+			discord.NewContainer(discord.NewTextDisplay(text)),
+		}),
+	)
 }
 
 func (p *Player) playTrack(e *events.ModalSubmitInteractionCreate, guildID snowflake.ID, track lavalink.Track) {

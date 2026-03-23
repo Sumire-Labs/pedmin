@@ -14,6 +14,8 @@ import (
 	"github.com/s12kuma01/pedmin/ui"
 )
 
+const seekStep = lavalink.Duration(10_000) // 10 seconds
+
 func (p *Player) HandleComponent(e *events.ComponentInteractionCreate) {
 	customID := e.Data.CustomID()
 	p.logger.Debug("component interaction received", slog.String("custom_id", customID))
@@ -42,6 +44,12 @@ func (p *Player) HandleComponent(e *events.ComponentInteractionCreate) {
 		p.handleBack(e, *guildID)
 	case "clear_queue":
 		p.handleClearQueue(e, *guildID)
+	case "seek_back":
+		p.handleSeek(e, *guildID, -seekStep)
+	case "seek_forward":
+		p.handleSeek(e, *guildID, seekStep)
+	case "shuffle":
+		p.handleShuffle(e, *guildID)
 	case "volume":
 		p.handleVolumeSettings(e, *guildID)
 	}
@@ -73,6 +81,7 @@ func (p *Player) handleSkip(e *events.ComponentInteractionCreate, guildID snowfl
 }
 
 func (p *Player) handleStop(e *events.ComponentInteractionCreate, guildID snowflake.ID) {
+	p.stopProgressTicker(guildID)
 	player := p.lavalink.ExistingPlayer(guildID)
 	if player != nil {
 		ctx, cancel := p.lavalinkCtx()
@@ -92,6 +101,41 @@ func (p *Player) handleStop(e *events.ComponentInteractionCreate, guildID snowfl
 func (p *Player) handleLoop(e *events.ComponentInteractionCreate, guildID snowflake.ID) {
 	queue := p.queues.Get(guildID)
 	queue.CycleLoop()
+
+	player := p.lavalink.Player(guildID)
+	p.respondWithPlayerUpdate(e, player, guildID)
+}
+
+func (p *Player) handleSeek(e *events.ComponentInteractionCreate, guildID snowflake.ID, delta lavalink.Duration) {
+	player := p.lavalink.ExistingPlayer(guildID)
+	if player == nil || player.Track() == nil {
+		_ = e.DeferUpdateMessage()
+		return
+	}
+	if player.Track().Info.IsStream {
+		_ = e.DeferUpdateMessage()
+		return
+	}
+
+	newPos := player.Position() + delta
+	if newPos < 0 {
+		newPos = 0
+	}
+	if length := player.Track().Info.Length; newPos > length {
+		newPos = length
+	}
+
+	ctx, cancel := p.lavalinkCtx()
+	defer cancel()
+	if err := player.Update(ctx, lavalink.WithPosition(newPos)); err != nil {
+		p.logger.Error("failed to seek", slog.Any("error", err))
+	}
+	p.respondWithPlayerUpdate(e, player, guildID)
+}
+
+func (p *Player) handleShuffle(e *events.ComponentInteractionCreate, guildID snowflake.ID) {
+	queue := p.queues.Get(guildID)
+	queue.Shuffle()
 
 	player := p.lavalink.Player(guildID)
 	p.respondWithPlayerUpdate(e, player, guildID)
