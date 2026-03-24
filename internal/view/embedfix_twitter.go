@@ -19,7 +19,7 @@ func BuildTweetEmbed(tweet *model.Tweet, ref model.EmbedRef) discord.MessageCrea
 
 // BuildTweetEmbedTranslated builds a translated tweet embed as layout components.
 func BuildTweetEmbedTranslated(tweet *model.Tweet, result *deepl.TranslateResult, ref model.EmbedRef) []discord.LayoutComponent {
-	footer := fmt.Sprintf("%s | <t:%d:f> · %sから翻訳", emojiX, tweet.CreatedAt.Unix(), deepl.LangName(result.DetectedLanguage))
+	footer := fmt.Sprintf("%s | <t:%d:R> · %sから翻訳", emojiX, tweet.CreatedAt.Unix(), deepl.LangName(result.DetectedLanguage))
 	components := BuildTweetComponents(tweet, ref, result.TranslatedText, footer)
 	return []discord.LayoutComponent{discord.NewContainer(components...)}
 }
@@ -54,7 +54,7 @@ func BuildTweetComponents(tweet *model.Tweet, ref model.EmbedRef, text, footerOv
 	)
 	components = append(components, discord.NewTextDisplay(stats))
 
-	footer := fmt.Sprintf("%s | <t:%d:f>", emojiX, tweet.CreatedAt.Unix())
+	footer := fmt.Sprintf("%s | <t:%d:R>", emojiX, tweet.CreatedAt.Unix())
 	if footerOverride != "" {
 		footer = footerOverride
 	}

@@ -19,7 +19,7 @@ func BuildTikTokEmbed(video *model.TikTokVideo, ref model.EmbedRef) discord.Mess
 
 // BuildTikTokEmbedTranslated builds a translated TikTok video embed as layout components.
 func BuildTikTokEmbedTranslated(video *model.TikTokVideo, result *deepl.TranslateResult, ref model.EmbedRef) []discord.LayoutComponent {
-	footer := fmt.Sprintf("%s | <t:%d:f> · %sから翻訳", emojiTikTok, video.CreatedAt.Unix(), deepl.LangName(result.DetectedLanguage))
+	footer := fmt.Sprintf("%s | <t:%d:R> · %sから翻訳", emojiTikTok, video.CreatedAt.Unix(), deepl.LangName(result.DetectedLanguage))
 	components := BuildTikTokComponents(video, ref, result.TranslatedText, footer)
 	return []discord.LayoutComponent{discord.NewContainer(components...)}
 }
@@ -64,7 +64,7 @@ func BuildTikTokComponents(video *model.TikTokVideo, ref model.EmbedRef, transla
 	)
 	components = append(components, discord.NewTextDisplay(stats))
 
-	footer := fmt.Sprintf("%s | <t:%d:f>", emojiTikTok, video.CreatedAt.Unix())
+	footer := fmt.Sprintf("%s | <t:%d:R>", emojiTikTok, video.CreatedAt.Unix())
 	if footerOverride != "" {
 		footer = footerOverride
 	}

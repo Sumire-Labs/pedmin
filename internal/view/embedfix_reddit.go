@@ -19,7 +19,7 @@ func BuildRedditEmbed(post *model.RedditPost, ref model.EmbedRef) discord.Messag
 
 // BuildRedditEmbedTranslated builds a translated Reddit post embed as layout components.
 func BuildRedditEmbedTranslated(post *model.RedditPost, result *deepl.TranslateResult, ref model.EmbedRef) []discord.LayoutComponent {
-	footer := fmt.Sprintf("%s | <t:%d:f> · %sから翻訳", emojiReddit, post.CreatedUTC.Unix(), deepl.LangName(result.DetectedLanguage))
+	footer := fmt.Sprintf("%s | <t:%d:R> · %sから翻訳", emojiReddit, post.CreatedUTC.Unix(), deepl.LangName(result.DetectedLanguage))
 	components := BuildRedditComponents(post, ref, result.TranslatedText, footer)
 	return []discord.LayoutComponent{discord.NewContainer(components...)}
 }
@@ -70,7 +70,7 @@ func BuildRedditComponents(post *model.RedditPost, ref model.EmbedRef, translate
 	)
 	components = append(components, discord.NewTextDisplay(stats))
 
-	footer := fmt.Sprintf("%s | <t:%d:f>", emojiReddit, post.CreatedUTC.Unix())
+	footer := fmt.Sprintf("%s | <t:%d:R>", emojiReddit, post.CreatedUTC.Unix())
 	if footerOverride != "" {
 		footer = footerOverride
 	}
