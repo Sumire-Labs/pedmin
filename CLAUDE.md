@@ -16,19 +16,20 @@ Windows Docker Desktop.
 ## Commands
 
 ```bash
-# Build
+# Via Makefile (recommended)
+make build               # Build binary
+make test                # Run tests
+make check               # Run vet + lint + sec
+make docker-up           # Start bot + Lavalink
+
+# Direct
 go build ./cmd/pedmin/...
-
-# Run tests
 go test ./...
-
-# Vet
 go vet ./...
-
-# Docker
-docker compose up        # Start bot + Lavalink
-docker compose up -d     # Detached mode
-docker compose build     # Rebuild bot image
+golangci-lint run        # Requires golangci-lint
+gosec ./...              # Requires gosec
+docker compose up
+docker compose build
 ```
 
 ## Architecture: Standard Go Layered Pattern
