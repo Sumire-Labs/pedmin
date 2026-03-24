@@ -111,6 +111,13 @@ func main() {
 	b.Register(levelingHandler)
 	levelingSvc.StartVoiceTicker(context.Background())
 
+	// --- Autorole ---
+
+	autoroleSvc := service.NewAutoroleService(b.Client, guildStore, logger)
+	autoroleHandler := handler.NewAutoroleHandler(b, autoroleSvc, logger)
+	handler.SetupAutoroleListeners(b.Client, autoroleHandler)
+	b.Register(autoroleHandler)
+
 	// --- Panel ---
 
 	panelClient := client.NewPelicanClient(cfg.PanelURL, cfg.PanelAPIKey, config.DefaultPanelPowerTimeout)

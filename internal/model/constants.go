@@ -19,6 +19,7 @@ const (
 	FuckfetchModuleID  = "fuckfetch"
 	CounterModuleID    = "counter"
 	LevelingModuleID   = "leveling"
+	AutoroleModuleID   = "autorole"
 
 	// MaxRSSFeedsPerGuild limits the number of RSS feeds per guild.
 	MaxRSSFeedsPerGuild = 10
