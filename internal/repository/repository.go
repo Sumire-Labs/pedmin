@@ -83,6 +83,16 @@ type VoiceXPUpdate struct {
 	XPAmount int
 }
 
+// PanelBuilderStore handles component panel persistence.
+type PanelBuilderStore interface {
+	CreatePanel(panel *model.ComponentPanel) error
+	UpdatePanel(panel *model.ComponentPanel) error
+	DeletePanel(id int64, guildID snowflake.ID) error
+	GetPanel(id int64, guildID snowflake.ID) (*model.ComponentPanel, error)
+	GetPanels(guildID snowflake.ID) ([]model.ComponentPanel, error)
+	CountPanels(guildID snowflake.ID) (int, error)
+}
+
 // GuildStore is the composite persistence interface embedding all domain stores.
 type GuildStore interface {
 	SettingsStore
@@ -90,6 +100,7 @@ type GuildStore interface {
 	RSSStore
 	CounterStore
 	LevelingStore
+	PanelBuilderStore
 	Close() error
 }
 

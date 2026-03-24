@@ -68,6 +68,15 @@ func buildMainContainer(options []ModuleOption) discord.ContainerComponent {
 		)
 	}
 
+	// Tools section
+	components = append(components,
+		discord.NewLargeSeparator(),
+		discord.NewTextDisplay("**ツール**"),
+		discord.NewActionRow(
+			discord.NewSecondaryButton("Component Builder", "builder:list"),
+		),
+	)
+
 	return discord.NewContainer(components...)
 }
 

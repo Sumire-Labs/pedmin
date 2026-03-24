@@ -118,6 +118,12 @@ func main() {
 	handler.SetupAutoroleListeners(b.Client, autoroleHandler)
 	b.Register(autoroleHandler)
 
+	// --- Component Builder ---
+
+	builderSvc := service.NewBuilderService(guildStore, b.Client, logger)
+	builderHandler := handler.NewBuilderHandler(builderSvc, logger)
+	b.Register(builderHandler)
+
 	// --- Panel ---
 
 	panelClient := client.NewPelicanClient(cfg.PanelURL, cfg.PanelAPIKey, config.DefaultPanelPowerTimeout)
