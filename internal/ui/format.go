@@ -24,20 +24,40 @@ func FormatBytes(bytes uint64) string {
 	return fmt.Sprintf("%.1f %s", val, units[i])
 }
 
-// BuildBar builds a progress bar using emoji characters.
+// block characters from full (█, index 8) to thinnest (▏, index 1).
+var blocks = [9]rune{' ', '▏', '▎', '▍', '▌', '▋', '▊', '▉', '█'}
+
+// BuildBar builds a progress bar using Unicode block characters.
 func BuildBar(percent float64, total int, showPercent bool) string {
-	filled := int(percent / 100 * float64(total))
-	if filled > total {
-		filled = total
+	if percent < 0 {
+		percent = 0
 	}
-	if filled < 0 {
-		filled = 0
+	if percent > 100 {
+		percent = 100
 	}
-	bar := strings.Repeat("🟢", filled) + strings.Repeat("⚫", total-filled)
+
+	// Each cell has 8 sub-steps.
+	steps := percent / 100 * float64(total) * 8
+	fullCells := int(steps) / 8
+	partialIdx := int(steps) % 8
+
+	var sb strings.Builder
+	sb.WriteRune('`')
+	for i := 0; i < total; i++ {
+		if i < fullCells {
+			sb.WriteRune(blocks[8]) // █
+		} else if i == fullCells {
+			sb.WriteRune(blocks[partialIdx])
+		} else {
+			sb.WriteRune(' ')
+		}
+	}
+	sb.WriteRune('`')
+
 	if showPercent {
-		bar += fmt.Sprintf(" %.1f%%", percent)
+		fmt.Fprintf(&sb, " %.1f%%", percent)
 	}
-	return bar
+	return sb.String()
 }
 
 // FormatUptime formats a duration into a human-readable uptime string (e.g. "3d 2h 15m").

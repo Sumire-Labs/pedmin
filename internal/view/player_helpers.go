@@ -5,11 +5,11 @@ package view
 
 import (
 	"fmt"
-	"strings"
 	"time"
 
 	"github.com/disgoorg/disgo/discord"
 	"github.com/disgoorg/disgolink/v3/lavalink"
+	"github.com/s12kuma01/pedmin/internal/ui"
 )
 
 // BuildThumbnail builds a thumbnail component from track info artwork.
@@ -22,15 +22,11 @@ func BuildThumbnail(info lavalink.TrackInfo) discord.ThumbnailComponent {
 
 // BuildProgressBar builds a text-based progress bar for the player.
 func BuildProgressBar(position, length lavalink.Duration) string {
-	total := 20
 	if length <= 0 {
-		return strings.Repeat("\u25ac", total)
+		return ui.BuildBar(100, 20, false)
 	}
-	filled := int(float64(position) / float64(length) * float64(total))
-	if filled > total {
-		filled = total
-	}
-	return strings.Repeat("\u2593", filled) + strings.Repeat("\u2591", total-filled)
+	percent := float64(position) / float64(length) * 100
+	return ui.BuildBar(percent, 20, false)
 }
 
 // FormatDuration formats a lavalink duration as h:mm:ss or m:ss.
