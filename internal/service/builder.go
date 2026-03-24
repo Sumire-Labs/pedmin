@@ -13,6 +13,7 @@ import (
 
 	"github.com/s12kuma01/pedmin/internal/model"
 	"github.com/s12kuma01/pedmin/internal/repository"
+	"github.com/s12kuma01/pedmin/internal/view"
 )
 
 // BuilderService handles component panel business logic.
@@ -128,84 +129,16 @@ func (s *BuilderService) MoveComponent(id int64, guildID snowflake.ID, from, to 
 	return panel, nil
 }
 
-// RenderPanel converts a panel's components to a Discord container.
-func (s *BuilderService) RenderPanel(panel *model.ComponentPanel) discord.ContainerComponent {
-	var subs []discord.ContainerSubComponent
-
-	for _, comp := range panel.Components {
-		switch comp.Type {
-		case model.PanelComponentText:
-			subs = append(subs, discord.NewTextDisplay(comp.Content))
-
-		case model.PanelComponentSection:
-			var textDisplays []discord.SectionSubComponent
-			for _, t := range comp.Texts {
-				if t != "" {
-					textDisplays = append(textDisplays, discord.NewTextDisplay(t))
-				}
-			}
-			if len(textDisplays) == 0 {
-				continue
-			}
-			section := discord.NewSection(textDisplays...)
-			if comp.ThumbnailURL != "" {
-				section = section.WithAccessory(discord.NewThumbnail(comp.ThumbnailURL))
-			}
-			subs = append(subs, section)
-
-		case model.PanelComponentSeparator:
-			if comp.Spacing == "large" {
-				subs = append(subs, discord.NewLargeSeparator())
-			} else {
-				subs = append(subs, discord.NewSmallSeparator())
-			}
-
-		case model.PanelComponentMedia:
-			var items []discord.MediaGalleryItem
-			for _, item := range comp.Items {
-				mgItem := discord.MediaGalleryItem{
-					Media: discord.UnfurledMediaItem{URL: item.URL},
-				}
-				if item.Description != "" {
-					mgItem.Description = item.Description
-				}
-				items = append(items, mgItem)
-			}
-			if len(items) > 0 {
-				subs = append(subs, discord.NewMediaGallery(items...))
-			}
-
-		case model.PanelComponentLinks:
-			var buttons []discord.InteractiveComponent
-			for _, btn := range comp.Buttons {
-				b := discord.NewLinkButton(btn.Label, btn.URL)
-				if btn.Emoji != "" {
-					b = b.WithEmoji(discord.ComponentEmoji{Name: btn.Emoji})
-				}
-				buttons = append(buttons, b)
-			}
-			if len(buttons) > 0 {
-				subs = append(subs, discord.NewActionRow(buttons...))
-			}
-		}
-	}
-
-	if len(subs) == 0 {
-		subs = append(subs, discord.NewTextDisplay("-# パネルにコンポーネントがありません"))
-	}
-
-	return discord.NewContainer(subs...)
-}
-
 // PreviewPanel renders the panel as an ephemeral message.
+// Note: uses view.RenderComponentPanel for component rendering.
 func (s *BuilderService) PreviewPanel(panel *model.ComponentPanel) discord.MessageCreate {
-	container := s.RenderPanel(panel)
+	container := view.RenderComponentPanel(panel)
 	return discord.NewMessageCreateV2(container).WithEphemeral(true)
 }
 
 // DeployPanel sends the rendered panel to a channel.
 func (s *BuilderService) DeployPanel(panel *model.ComponentPanel, channelID snowflake.ID) error {
-	container := s.RenderPanel(panel)
+	container := view.RenderComponentPanel(panel)
 	msg := discord.NewMessageCreateV2(container)
 	_, err := s.client.Rest.CreateMessage(channelID, msg)
 	return err
