@@ -19,7 +19,7 @@ func LevelingLeaderboard(entries []model.LeaderboardEntry, page, totalPages int)
 
 // LevelingLeaderboardUpdate builds the leaderboard as a message update (for pagination).
 func LevelingLeaderboardUpdate(entries []model.LeaderboardEntry, page, totalPages int) discord.MessageUpdate {
-	return discord.NewMessageUpdateV2([]discord.LayoutComponent{levelingLeaderboardContainer(entries, page, totalPages)})
+	return discord.NewMessageUpdateV2(levelingLeaderboardContainer(entries, page, totalPages))
 }
 
 func levelingLeaderboardContainer(entries []model.LeaderboardEntry, page, totalPages int) discord.ContainerComponent {

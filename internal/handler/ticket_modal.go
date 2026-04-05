@@ -45,17 +45,13 @@ func (h *TicketHandler) HandleModal(e *events.ModalSubmitInteractionCreate) {
 	channelID, _, err := h.service.CreateTicket(*guildID, e.User().ID, subject, description)
 	if err != nil {
 		h.logger.Error("failed to create ticket", slog.Any("error", err))
-		_, _ = e.Client().Rest.UpdateInteractionResponse(e.ApplicationID(), e.Token(), discord.NewMessageUpdateV2([]discord.LayoutComponent{
-			discord.NewContainer(
-				discord.NewTextDisplay("チケットの作成に失敗しました。"),
-			),
-		}))
+		_, _ = e.Client().Rest.UpdateInteractionResponse(e.ApplicationID(), e.Token(), discord.NewMessageUpdateV2(discord.NewContainer(
+			discord.NewTextDisplay("チケットの作成に失敗しました。"),
+		)))
 		return
 	}
 
-	_, _ = e.Client().Rest.UpdateInteractionResponse(e.ApplicationID(), e.Token(), discord.NewMessageUpdateV2([]discord.LayoutComponent{
-		discord.NewContainer(
-			discord.NewTextDisplay(fmt.Sprintf("チケットを作成しました: <#%d>", channelID)),
-		),
-	}))
+	_, _ = e.Client().Rest.UpdateInteractionResponse(e.ApplicationID(), e.Token(), discord.NewMessageUpdateV2(discord.NewContainer(
+		discord.NewTextDisplay(fmt.Sprintf("チケットを作成しました: <#%d>", channelID)),
+	)))
 }

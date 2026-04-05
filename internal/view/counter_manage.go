@@ -44,21 +44,19 @@ func CounterManagePanel(counters []model.Counter) discord.MessageCreate {
 
 // CounterDetail builds the counter detail panel.
 func CounterDetail(counter model.Counter) discord.MessageUpdate {
-	return discord.NewMessageUpdateV2([]discord.LayoutComponent{
-		discord.NewContainer(
-			discord.NewTextDisplay(fmt.Sprintf("### %s", counter.Word)),
-			discord.NewSmallSeparator(),
-			discord.NewTextDisplay(fmt.Sprintf(
-				"**マッチタイプ:** %s\n**追加日:** %s",
-				model.MatchTypeLabel(counter.MatchType),
-				counter.CreatedAt.Format("2006-01-02"),
-			)),
-			discord.NewLargeSeparator(),
-			discord.NewActionRow(
-				discord.NewDangerButton("削除", fmt.Sprintf("%s:delete:%d", model.CounterModuleID, counter.ID)),
-			),
+	return discord.NewMessageUpdateV2(discord.NewContainer(
+		discord.NewTextDisplay(fmt.Sprintf("### %s", counter.Word)),
+		discord.NewSmallSeparator(),
+		discord.NewTextDisplay(fmt.Sprintf(
+			"**マッチタイプ:** %s\n**追加日:** %s",
+			model.MatchTypeLabel(counter.MatchType),
+			counter.CreatedAt.Format("2006-01-02"),
+		)),
+		discord.NewLargeSeparator(),
+		discord.NewActionRow(
+			discord.NewDangerButton("削除", fmt.Sprintf("%s:delete:%d", model.CounterModuleID, counter.ID)),
 		),
-	})
+	))
 }
 
 // CounterAddTypePrompt builds the match type selection panel.

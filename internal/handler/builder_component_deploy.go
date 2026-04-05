@@ -73,17 +73,15 @@ func (h *BuilderHandler) handleDeployConfirm(e *events.ComponentInteractionCreat
 
 	if err := h.service.DeployPanel(panel, channelID); err != nil {
 		h.logger.Error("failed to deploy panel", slog.Any("error", err))
-		_ = e.UpdateMessage(discord.NewMessageUpdateV2([]discord.LayoutComponent{
+		_ = e.UpdateMessage(discord.NewMessageUpdateV2(
 			view.BuilderErrorContainer(fmt.Sprintf("配信に失敗しました: %s", err.Error())),
-		}))
+		))
 		return
 	}
 
-	_ = e.UpdateMessage(discord.NewMessageUpdateV2([]discord.LayoutComponent{
-		discord.NewContainer(
-			discord.NewTextDisplay(fmt.Sprintf("**%s** を <#%d> に配信しました。", panel.Name, channelID)),
-		),
-	}))
+	_ = e.UpdateMessage(discord.NewMessageUpdateV2(discord.NewContainer(
+		discord.NewTextDisplay(fmt.Sprintf("**%s** を <#%d> に配信しました。", panel.Name, channelID)),
+	)))
 }
 
 func (h *BuilderHandler) handleDeletePanel(e *events.ComponentInteractionCreate, panelID string) {

@@ -51,11 +51,9 @@ func (h *FuckfetchHandler) HandleCommand(e *events.ApplicationCommandInteraction
 		h.logger.Error("failed to gather system info", slog.Any("error", err))
 		_, _ = e.Client().Rest.UpdateInteractionResponse(
 			e.Client().ApplicationID, e.Token(),
-			discord.NewMessageUpdateV2([]discord.LayoutComponent{
-				discord.NewContainer(
-					discord.NewTextDisplay("❌ システム情報の取得に失敗: "+err.Error()),
-				),
-			}),
+			discord.NewMessageUpdateV2(discord.NewContainer(
+				discord.NewTextDisplay("❌ システム情報の取得に失敗: "+err.Error()),
+			)),
 		)
 		return
 	}
@@ -63,7 +61,7 @@ func (h *FuckfetchHandler) HandleCommand(e *events.ApplicationCommandInteraction
 	ui := view.BuildFuckfetchOutput(info)
 	_, _ = e.Client().Rest.UpdateInteractionResponse(
 		e.Client().ApplicationID, e.Token(),
-		discord.NewMessageUpdateV2([]discord.LayoutComponent{ui}),
+		discord.NewMessageUpdateV2(ui),
 	)
 }
 

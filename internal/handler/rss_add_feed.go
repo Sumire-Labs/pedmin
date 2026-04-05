@@ -51,15 +51,13 @@ func (h *RSSHandler) rssHandleAddChannel(e *events.ComponentInteractionCreate, e
 	feed, err := h.service.AddFeed(ctx, *e.GuildID(), channelID, feedURL)
 	if err != nil {
 		h.logger.Error("failed to add feed", slog.Any("error", err))
-		_, _ = e.Client().Rest.UpdateInteractionResponse(e.ApplicationID(), e.Token(), discord.NewMessageUpdateV2([]discord.LayoutComponent{
+		_, _ = e.Client().Rest.UpdateInteractionResponse(e.ApplicationID(), e.Token(), discord.NewMessageUpdateV2(
 			view.RSSErrorContainer(fmt.Sprintf("フィード追加に失敗しました:\n%s", err.Error())),
-		}))
+		))
 		return
 	}
 
-	_, _ = e.Client().Rest.UpdateInteractionResponse(e.ApplicationID(), e.Token(), discord.NewMessageUpdateV2([]discord.LayoutComponent{
-		discord.NewContainer(
-			discord.NewTextDisplay(fmt.Sprintf("**%s** を <#%d> に追加しました。", feed.Title, feed.ChannelID)),
-		),
-	}))
+	_, _ = e.Client().Rest.UpdateInteractionResponse(e.ApplicationID(), e.Token(), discord.NewMessageUpdateV2(discord.NewContainer(
+		discord.NewTextDisplay(fmt.Sprintf("**%s** を <#%d> に追加しました。", feed.Title, feed.ChannelID)),
+	)))
 }

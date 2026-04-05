@@ -80,7 +80,7 @@ func (h *PanelHandler) HandleCommand(e *events.ApplicationCommandInteractionCrea
 	}
 
 	msg := view.PanelServerList(servers)
-	_, _ = e.Client().Rest.UpdateInteractionResponse(e.ApplicationID(), e.Token(), discord.NewMessageUpdateV2(msg.Components))
+	_, _ = e.Client().Rest.UpdateInteractionResponse(e.ApplicationID(), e.Token(), discord.NewMessageUpdateV2(msg.Components...))
 }
 
 func (h *PanelHandler) isAllowed(userID snowflake.ID) bool {

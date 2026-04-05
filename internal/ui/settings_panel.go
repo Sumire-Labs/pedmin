@@ -29,7 +29,7 @@ func BuildMainPanel(options []ModuleOption) discord.MessageCreate {
 
 // BuildMainPanelUpdate builds the settings panel as a message update.
 func BuildMainPanelUpdate(options []ModuleOption) discord.MessageUpdate {
-	return discord.NewMessageUpdateV2([]discord.LayoutComponent{buildMainContainer(options)})
+	return discord.NewMessageUpdateV2(buildMainContainer(options))
 }
 
 func buildMainContainer(options []ModuleOption) discord.ContainerComponent {
@@ -115,16 +115,12 @@ func BuildModulePanel(info module.Info, enabled bool, settingsPanel []discord.La
 		),
 	)
 
-	return discord.NewMessageUpdateV2([]discord.LayoutComponent{
-		discord.NewContainer(components...),
-	})
+	return discord.NewMessageUpdateV2(discord.NewContainer(components...))
 }
 
 // BuildModuleNotFound builds an error panel when a module is not found.
 func BuildModuleNotFound() discord.MessageUpdate {
-	return discord.NewMessageUpdateV2([]discord.LayoutComponent{
-		discord.NewContainer(
-			discord.NewTextDisplay("モジュールが見つかりません。"),
-		),
-	})
+	return discord.NewMessageUpdateV2(discord.NewContainer(
+		discord.NewTextDisplay("モジュールが見つかりません。"),
+	))
 }

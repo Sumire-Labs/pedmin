@@ -26,17 +26,17 @@ func (h *PlayerHandler) handleAddModal(e *events.ComponentInteractionCreate) {
 
 func (h *PlayerHandler) handleShowQueue(e *events.ComponentInteractionCreate, guildID snowflake.ID) {
 	queueUI := h.service.BuildQueueUI(guildID)
-	_ = e.UpdateMessage(discord.NewMessageUpdateV2([]discord.LayoutComponent{queueUI}))
+	_ = e.UpdateMessage(discord.NewMessageUpdateV2(queueUI))
 }
 
 func (h *PlayerHandler) handleBack(e *events.ComponentInteractionCreate, guildID snowflake.ID) {
 	playerUI := h.service.BuildPlayerUI(guildID)
-	_ = e.UpdateMessage(discord.NewMessageUpdateV2([]discord.LayoutComponent{playerUI}))
+	_ = e.UpdateMessage(discord.NewMessageUpdateV2(playerUI))
 }
 
 func (h *PlayerHandler) handleClearQueue(e *events.ComponentInteractionCreate, guildID snowflake.ID) {
 	h.service.ClearQueue(guildID)
 
 	queueUI := h.service.BuildQueueUI(guildID)
-	_ = e.UpdateMessage(discord.NewMessageUpdateV2([]discord.LayoutComponent{queueUI}))
+	_ = e.UpdateMessage(discord.NewMessageUpdateV2(queueUI))
 }

@@ -84,7 +84,5 @@ func LevelingMultipliersTab(settings *model.LevelingSettings) discord.MessageUpd
 		),
 	)
 
-	return discord.NewMessageUpdateV2([]discord.LayoutComponent{
-		discord.NewContainer(components...),
-	})
+	return discord.NewMessageUpdateV2(discord.NewContainer(components...))
 }

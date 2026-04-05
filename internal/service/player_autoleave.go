@@ -67,7 +67,7 @@ func (s *PlayerService) startAutoLeaveTimer(guildID snowflake.ID) {
 			newPlayer := s.lavalink.Player(guildID)
 			queue := s.queues.Get(guildID)
 			ui := view.BuildPlayerUI(newPlayer, queue)
-			if _, err := s.client.Rest.UpdateMessage(tracked.ChannelID, tracked.MessageID, discord.NewMessageUpdateV2([]discord.LayoutComponent{ui})); err != nil {
+			if _, err := s.client.Rest.UpdateMessage(tracked.ChannelID, tracked.MessageID, discord.NewMessageUpdateV2(ui)); err != nil {
 				s.logger.Warn("failed to update player message on auto-leave", slog.Any("error", err))
 				s.messages.Delete(guildID)
 			}

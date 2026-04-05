@@ -56,14 +56,12 @@ func (h *BuilderHandler) handleAddSeparator(e *events.ComponentInteractionCreate
 		{Label: "小さいセパレータ", Value: "small"},
 		{Label: "大きいセパレータ", Value: "large"},
 	}
-	_ = e.UpdateMessage(discord.NewMessageUpdateV2([]discord.LayoutComponent{
-		discord.NewContainer(
-			discord.NewTextDisplay("セパレータの種類を選択:"),
-			discord.NewActionRow(
-				discord.NewStringSelectMenu(model.BuilderModuleID+":sep_select:"+panelID, "種類を選択...", options...),
-			),
+	_ = e.UpdateMessage(discord.NewMessageUpdateV2(discord.NewContainer(
+		discord.NewTextDisplay("セパレータの種類を選択:"),
+		discord.NewActionRow(
+			discord.NewStringSelectMenu(model.BuilderModuleID+":sep_select:"+panelID, "種類を選択...", options...),
 		),
-	}))
+	)))
 }
 
 func (h *BuilderHandler) handleSepSelect(e *events.ComponentInteractionCreate, panelID string) {

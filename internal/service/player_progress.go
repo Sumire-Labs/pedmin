@@ -108,7 +108,7 @@ func (s *PlayerService) UpdateTrackedPlayer(player disgolink.Player) {
 
 	queue := s.queues.Get(guildID)
 	ui := view.BuildPlayerUI(player, queue)
-	if _, err := s.client.Rest.UpdateMessage(tracked.ChannelID, tracked.MessageID, discord.NewMessageUpdateV2([]discord.LayoutComponent{ui})); err != nil {
+	if _, err := s.client.Rest.UpdateMessage(tracked.ChannelID, tracked.MessageID, discord.NewMessageUpdateV2(ui)); err != nil {
 		s.logger.Warn("failed to update player message", slog.Any("error", err))
 		s.messages.Delete(guildID)
 	}

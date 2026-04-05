@@ -74,7 +74,5 @@ func BuilderEditPanel(panel *model.ComponentPanel) discord.MessageUpdate {
 		),
 	)
 
-	return discord.NewMessageUpdateV2([]discord.LayoutComponent{
-		discord.NewContainer(components...),
-	})
+	return discord.NewMessageUpdateV2(discord.NewContainer(components...))
 }

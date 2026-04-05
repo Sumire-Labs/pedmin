@@ -54,13 +54,11 @@ func BuilderComponentDetail(panel *model.ComponentPanel, index int) discord.Mess
 	}
 	deleteBtn := discord.NewDangerButton("削除", fmt.Sprintf("%s:delete_comp:%s:%d", model.BuilderModuleID, pid, index))
 
-	return discord.NewMessageUpdateV2([]discord.LayoutComponent{
-		discord.NewContainer(
-			discord.NewTextDisplay(fmt.Sprintf("### コンポーネント %d", index+1)),
-			discord.NewSmallSeparator(),
-			discord.NewTextDisplay(fmt.Sprintf("**タイプ:** %s\n**内容:** %s", ComponentTypeName(comp.Type), ComponentSummary(comp))),
-			discord.NewLargeSeparator(),
-			discord.NewActionRow(upBtn, downBtn, deleteBtn),
-		),
-	})
+	return discord.NewMessageUpdateV2(discord.NewContainer(
+		discord.NewTextDisplay(fmt.Sprintf("### コンポーネント %d", index+1)),
+		discord.NewSmallSeparator(),
+		discord.NewTextDisplay(fmt.Sprintf("**タイプ:** %s\n**内容:** %s", ComponentTypeName(comp.Type), ComponentSummary(comp))),
+		discord.NewLargeSeparator(),
+		discord.NewActionRow(upBtn, downBtn, deleteBtn),
+	))
 }

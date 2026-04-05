@@ -67,9 +67,9 @@ func (h *RSSHandler) rssHandleManageSelect(e *events.ComponentInteractionCreate)
 	feed, err := h.service.GetFeed(*e.GuildID(), feedID)
 	if err != nil {
 		h.logger.Error("failed to get feed", slog.Any("error", err))
-		_ = e.UpdateMessage(discord.NewMessageUpdateV2([]discord.LayoutComponent{
+		_ = e.UpdateMessage(discord.NewMessageUpdateV2(
 			view.RSSErrorContainer("フィードが見つかりませんでした。"),
-		}))
+		))
 		return
 	}
 
@@ -90,14 +90,12 @@ func (h *RSSHandler) rssHandleDelete(e *events.ComponentInteractionCreate, feedI
 	}
 
 	if len(feeds) == 0 {
-		_ = e.UpdateMessage(discord.NewMessageUpdateV2([]discord.LayoutComponent{
-			discord.NewContainer(
-				discord.NewTextDisplay("登録されているフィードはありません。"),
-			),
-		}))
+		_ = e.UpdateMessage(discord.NewMessageUpdateV2(discord.NewContainer(
+			discord.NewTextDisplay("登録されているフィードはありません。"),
+		)))
 		return
 	}
 
 	msg := view.RSSManagePanel(feeds)
-	_ = e.UpdateMessage(discord.NewMessageUpdateV2(msg.Components))
+	_ = e.UpdateMessage(discord.NewMessageUpdateV2(msg.Components...))
 }

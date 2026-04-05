@@ -75,7 +75,7 @@ func (h *BuilderHandler) handleDeleteComponent(e *events.ComponentInteractionCre
 	}
 
 	msg := view.BuilderManagePanel(panel)
-	_ = e.UpdateMessage(discord.NewMessageUpdateV2(msg.Components))
+	_ = e.UpdateMessage(discord.NewMessageUpdateV2(msg.Components...))
 }
 
 func (h *BuilderHandler) handleMoveUp(e *events.ComponentInteractionCreate, extra string) {

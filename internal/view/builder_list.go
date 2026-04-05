@@ -18,7 +18,7 @@ func BuilderListPanel(panels []model.ComponentPanel, count int) discord.MessageC
 
 // BuilderListPanelUpdate builds the panel list as a message update.
 func BuilderListPanelUpdate(panels []model.ComponentPanel, count int) discord.MessageUpdate {
-	return discord.NewMessageUpdateV2([]discord.LayoutComponent{builderListContainer(panels, count)})
+	return discord.NewMessageUpdateV2(builderListContainer(panels, count))
 }
 
 func builderListContainer(panels []model.ComponentPanel, count int) discord.ContainerComponent {

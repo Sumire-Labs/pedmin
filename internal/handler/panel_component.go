@@ -113,7 +113,7 @@ func (h *PanelHandler) panelHandleBack(e *events.ComponentInteractionCreate) {
 	}
 
 	msg := view.PanelServerList(servers)
-	_, _ = e.Client().Rest.UpdateInteractionResponse(e.ApplicationID(), e.Token(), discord.NewMessageUpdateV2(msg.Components))
+	_, _ = e.Client().Rest.UpdateInteractionResponse(e.ApplicationID(), e.Token(), discord.NewMessageUpdateV2(msg.Components...))
 }
 
 func (h *PanelHandler) panelHandleConsolePrompt(e *events.ComponentInteractionCreate, identifier string) {

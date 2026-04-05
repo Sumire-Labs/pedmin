@@ -49,6 +49,6 @@ func (h *URLHandler) HandleComponent(e *events.ComponentInteractionCreate) {
 
 		msg := view.BuildURLMainPanel(hasXGD, hasVT)
 		_, _ = e.Client().Rest.UpdateInteractionResponse(e.ApplicationID(), e.Token(),
-			discord.NewMessageUpdateV2(msg.Components))
+			discord.NewMessageUpdateV2(msg.Components...))
 	}
 }

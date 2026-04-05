@@ -60,18 +60,16 @@ func RSSFeedDetail(feed model.RSSFeed) discord.MessageUpdate {
 		title = feed.URL
 	}
 
-	return discord.NewMessageUpdateV2([]discord.LayoutComponent{
-		discord.NewContainer(
-			discord.NewTextDisplay(fmt.Sprintf("### %s", title)),
-			discord.NewSmallSeparator(),
-			discord.NewTextDisplay(fmt.Sprintf(
-				"**URL:** %s\n**配信先:** <#%d>\n**追加日:** %s",
-				feed.URL, feed.ChannelID, feed.AddedAt.Format("2006-01-02"),
-			)),
-			discord.NewLargeSeparator(),
-			discord.NewActionRow(
-				discord.NewDangerButton("削除", fmt.Sprintf("%s:delete:%d", model.RSSModuleID, feed.ID)),
-			),
+	return discord.NewMessageUpdateV2(discord.NewContainer(
+		discord.NewTextDisplay(fmt.Sprintf("### %s", title)),
+		discord.NewSmallSeparator(),
+		discord.NewTextDisplay(fmt.Sprintf(
+			"**URL:** %s\n**配信先:** <#%d>\n**追加日:** %s",
+			feed.URL, feed.ChannelID, feed.AddedAt.Format("2006-01-02"),
+		)),
+		discord.NewLargeSeparator(),
+		discord.NewActionRow(
+			discord.NewDangerButton("削除", fmt.Sprintf("%s:delete:%d", model.RSSModuleID, feed.ID)),
 		),
-	})
+	))
 }

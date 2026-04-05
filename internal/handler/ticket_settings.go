@@ -94,7 +94,7 @@ func (h *TicketHandler) ticketArchiveTicket(e *events.ComponentInteractionCreate
 	}
 
 	archiveUI := view.TicketArchiveInfo(ticket.Number, ticket.UserID, ticket.Subject)
-	_, _ = e.Client().Rest.UpdateInteractionResponse(e.ApplicationID(), e.Token(), discord.NewMessageUpdateV2(archiveUI.Components))
+	_, _ = e.Client().Rest.UpdateInteractionResponse(e.ApplicationID(), e.Token(), discord.NewMessageUpdateV2(archiveUI.Components...))
 }
 
 func (h *TicketHandler) ticketDeleteTicket(e *events.ComponentInteractionCreate, guildID snowflake.ID) {

@@ -51,13 +51,11 @@ func TicketSettingsPanel(settings *model.TicketSettings) []discord.LayoutCompone
 
 // TicketDeployConfirm builds the deploy confirmation panel.
 func TicketDeployConfirm(channelID snowflake.ID) discord.MessageUpdate {
-	return discord.NewMessageUpdateV2([]discord.LayoutComponent{
-		discord.NewContainer(
-			discord.NewTextDisplay("パネルを設置するチャンネル: <#"+channelID.String()+">"),
-			discord.NewActionRow(
-				discord.NewSuccessButton("設置する", model.TicketModuleID+":deploy_confirm:"+channelID.String()),
-				discord.NewSecondaryButton("キャンセル", model.TicketModuleID+":deploy_cancel"),
-			),
+	return discord.NewMessageUpdateV2(discord.NewContainer(
+		discord.NewTextDisplay("パネルを設置するチャンネル: <#"+channelID.String()+">"),
+		discord.NewActionRow(
+			discord.NewSuccessButton("設置する", model.TicketModuleID+":deploy_confirm:"+channelID.String()),
+			discord.NewSecondaryButton("キャンセル", model.TicketModuleID+":deploy_cancel"),
 		),
-	})
+	))
 }

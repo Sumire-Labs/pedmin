@@ -90,15 +90,13 @@ func CounterUserRanking(word string, ranks []model.CounterUserRank, period model
 		}
 	}
 
-	return discord.NewMessageUpdateV2([]discord.LayoutComponent{
-		discord.NewContainer(
-			discord.NewTextDisplay(fmt.Sprintf("### \"%s\" のランキング", word)),
-			discord.NewSmallSeparator(),
-			discord.NewTextDisplay(fmt.Sprintf("**期間:** %s", periodLabel)),
-			discord.NewSmallSeparator(),
-			discord.NewTextDisplay(rankText.String()),
-		),
-	})
+	return discord.NewMessageUpdateV2(discord.NewContainer(
+		discord.NewTextDisplay(fmt.Sprintf("### \"%s\" のランキング", word)),
+		discord.NewSmallSeparator(),
+		discord.NewTextDisplay(fmt.Sprintf("**期間:** %s", periodLabel)),
+		discord.NewSmallSeparator(),
+		discord.NewTextDisplay(rankText.String()),
+	))
 }
 
 func periodLabel(period model.StatsPeriod) string {

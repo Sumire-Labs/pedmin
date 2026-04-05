@@ -85,7 +85,7 @@ func (h *PlayerHandler) handleStop(e *events.ComponentInteractionCreate, guildID
 	h.service.Stop(guildID)
 
 	playerUI := h.service.BuildPlayerUI(guildID)
-	_ = e.UpdateMessage(discord.NewMessageUpdateV2([]discord.LayoutComponent{playerUI}))
+	_ = e.UpdateMessage(discord.NewMessageUpdateV2(playerUI))
 }
 
 func (h *PlayerHandler) handleLoop(e *events.ComponentInteractionCreate, guildID snowflake.ID) {
@@ -115,7 +115,7 @@ func (h *PlayerHandler) handleShuffle(e *events.ComponentInteractionCreate, guil
 
 func (h *PlayerHandler) respondWithPlayerUpdate(e *events.ComponentInteractionCreate, guildID snowflake.ID) {
 	playerUI := h.service.BuildPlayerUI(guildID)
-	_ = e.UpdateMessage(discord.NewMessageUpdateV2([]discord.LayoutComponent{playerUI}))
+	_ = e.UpdateMessage(discord.NewMessageUpdateV2(playerUI))
 }
 
 func (h *PlayerHandler) handleVolumeSettings(e *events.ComponentInteractionCreate, guildID snowflake.ID) {

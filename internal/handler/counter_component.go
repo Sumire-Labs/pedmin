@@ -102,11 +102,9 @@ func (h *CounterHandler) counterHandleManageSelect(e *events.ComponentInteractio
 	counter, err := h.service.GetCounter(counterID, *e.GuildID())
 	if err != nil {
 		h.logger.Error("failed to get counter", slog.Any("error", err))
-		_ = e.UpdateMessage(discord.NewMessageUpdateV2([]discord.LayoutComponent{
-			discord.NewContainer(
-				discord.NewTextDisplay("カウンターが見つかりませんでした。"),
-			),
-		}))
+		_ = e.UpdateMessage(discord.NewMessageUpdateV2(discord.NewContainer(
+			discord.NewTextDisplay("カウンターが見つかりませんでした。"),
+		)))
 		return
 	}
 
@@ -127,16 +125,14 @@ func (h *CounterHandler) counterHandleDelete(e *events.ComponentInteractionCreat
 	}
 
 	if len(counters) == 0 {
-		_ = e.UpdateMessage(discord.NewMessageUpdateV2([]discord.LayoutComponent{
-			discord.NewContainer(
-				discord.NewTextDisplay("登録されているカウンターはありません。"),
-			),
-		}))
+		_ = e.UpdateMessage(discord.NewMessageUpdateV2(discord.NewContainer(
+			discord.NewTextDisplay("登録されているカウンターはありません。"),
+		)))
 		return
 	}
 
 	msg := view.CounterManagePanel(counters)
-	_ = e.UpdateMessage(discord.NewMessageUpdateV2(msg.Components))
+	_ = e.UpdateMessage(discord.NewMessageUpdateV2(msg.Components...))
 }
 
 func (h *CounterHandler) counterHandleStats(e *events.ComponentInteractionCreate, period model.StatsPeriod) {
@@ -161,16 +157,14 @@ func (h *CounterHandler) counterHandleStatsPeriod(e *events.ComponentInteraction
 	stats, err := h.service.GetStats(*e.GuildID(), period)
 	if err != nil {
 		h.logger.Error("failed to get counter stats", slog.Any("error", err))
-		_ = e.UpdateMessage(discord.NewMessageUpdateV2([]discord.LayoutComponent{
-			discord.NewContainer(
-				discord.NewTextDisplay("統計の取得に失敗しました。"),
-			),
-		}))
+		_ = e.UpdateMessage(discord.NewMessageUpdateV2(discord.NewContainer(
+			discord.NewTextDisplay("統計の取得に失敗しました。"),
+		)))
 		return
 	}
 
 	msg := view.CounterStatsPanel(stats, period)
-	_ = e.UpdateMessage(discord.NewMessageUpdateV2(msg.Components))
+	_ = e.UpdateMessage(discord.NewMessageUpdateV2(msg.Components...))
 }
 
 func (h *CounterHandler) counterHandleStatsSelect(e *events.ComponentInteractionCreate) {

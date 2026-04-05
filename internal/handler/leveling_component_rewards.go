@@ -99,9 +99,9 @@ func (h *LevelingHandler) handleRewardRemove(e *events.ComponentInteractionCreat
 		return
 	}
 
-	_ = e.UpdateMessage(discord.NewMessageUpdateV2([]discord.LayoutComponent{
+	_ = e.UpdateMessage(discord.NewMessageUpdateV2(
 		discord.NewContainer(discord.NewTextDisplay("報酬を削除しました。")),
-	}))
+	))
 }
 
 func (h *LevelingHandler) handleRoleMultAddPrompt(e *events.ComponentInteractionCreate) {

@@ -35,15 +35,13 @@ func BuildURLMainPanel(hasXGD, hasVT bool) discord.MessageCreate {
 func BuildURLShortenResult(originalURL, shortURL string) discord.MessageUpdate {
 	text := fmt.Sprintf("### 🔗 URL短縮\n**元URL:** %s\n**短縮URL:** %s", originalURL, shortURL)
 
-	return discord.NewMessageUpdateV2([]discord.LayoutComponent{
-		discord.NewContainer(
-			discord.NewTextDisplay(text),
-			discord.NewSmallSeparator(),
-			discord.NewActionRow(
-				discord.NewSecondaryButton("← 戻る", model.URLModuleID+":back"),
-			),
+	return discord.NewMessageUpdateV2(discord.NewContainer(
+		discord.NewTextDisplay(text),
+		discord.NewSmallSeparator(),
+		discord.NewActionRow(
+			discord.NewSecondaryButton("← 戻る", model.URLModuleID+":back"),
 		),
-	})
+	))
 }
 
 // BuildURLCheckResult builds the URL check result panel.
@@ -62,26 +60,22 @@ func BuildURLCheckResult(rawURL string, result *model.VTResult) discord.MessageU
 		rawURL, verdict,
 		result.Harmless, result.Malicious, result.Suspicious, result.Undetected)
 
-	return discord.NewMessageUpdateV2([]discord.LayoutComponent{
-		discord.NewContainer(
-			discord.NewTextDisplay(text),
-			discord.NewSmallSeparator(),
-			discord.NewActionRow(
-				discord.NewSecondaryButton("← 戻る", model.URLModuleID+":back"),
-			),
+	return discord.NewMessageUpdateV2(discord.NewContainer(
+		discord.NewTextDisplay(text),
+		discord.NewSmallSeparator(),
+		discord.NewActionRow(
+			discord.NewSecondaryButton("← 戻る", model.URLModuleID+":back"),
 		),
-	})
+	))
 }
 
 // BuildURLErrorPanel builds the URL error panel.
 func BuildURLErrorPanel(errMsg string) discord.MessageUpdate {
-	return discord.NewMessageUpdateV2([]discord.LayoutComponent{
-		discord.NewContainer(
-			discord.NewTextDisplay(fmt.Sprintf("### ❌ エラー\n%s", errMsg)),
-			discord.NewSmallSeparator(),
-			discord.NewActionRow(
-				discord.NewSecondaryButton("← 戻る", model.URLModuleID+":back"),
-			),
+	return discord.NewMessageUpdateV2(discord.NewContainer(
+		discord.NewTextDisplay(fmt.Sprintf("### ❌ エラー\n%s", errMsg)),
+		discord.NewSmallSeparator(),
+		discord.NewActionRow(
+			discord.NewSecondaryButton("← 戻る", model.URLModuleID+":back"),
 		),
-	})
+	))
 }

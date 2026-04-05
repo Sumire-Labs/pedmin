@@ -112,14 +112,12 @@ func PanelServerDetail(server model.Server, res *model.Resources) discord.Messag
 	backBtn := discord.NewSecondaryButton("← 戻る", model.PanelModuleID+":back")
 	refreshBtn := discord.NewSecondaryButton("🔄 更新", model.PanelModuleID+":refresh:"+id)
 
-	return discord.NewMessageUpdateV2([]discord.LayoutComponent{
-		discord.NewContainer(
-			discord.NewTextDisplay(header),
-			discord.NewSmallSeparator(),
-			resourceBlock,
-			discord.NewSmallSeparator(),
-			discord.NewActionRow(startBtn, restartBtn, stopBtn),
-			discord.NewActionRow(consoleBtn, backBtn, refreshBtn),
-		),
-	})
+	return discord.NewMessageUpdateV2(discord.NewContainer(
+		discord.NewTextDisplay(header),
+		discord.NewSmallSeparator(),
+		resourceBlock,
+		discord.NewSmallSeparator(),
+		discord.NewActionRow(startBtn, restartBtn, stopBtn),
+		discord.NewActionRow(consoleBtn, backBtn, refreshBtn),
+	))
 }

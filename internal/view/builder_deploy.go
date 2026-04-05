@@ -29,27 +29,23 @@ func BuilderDeployPrompt(panelID int64) discord.MessageCreate {
 // BuilderDeployConfirm builds the deploy confirmation.
 func BuilderDeployConfirm(panelID int64, channelID snowflake.ID) discord.MessageUpdate {
 	pid := fmt.Sprintf("%d", panelID)
-	return discord.NewMessageUpdateV2([]discord.LayoutComponent{
-		discord.NewContainer(
-			discord.NewTextDisplay(fmt.Sprintf("配信先: <#%d>", channelID)),
-			discord.NewActionRow(
-				discord.NewSuccessButton("配信する", fmt.Sprintf("%s:deploy_confirm:%s:%d", model.BuilderModuleID, pid, channelID)),
-				discord.NewSecondaryButton("キャンセル", model.BuilderModuleID+":back"),
-			),
+	return discord.NewMessageUpdateV2(discord.NewContainer(
+		discord.NewTextDisplay(fmt.Sprintf("配信先: <#%d>", channelID)),
+		discord.NewActionRow(
+			discord.NewSuccessButton("配信する", fmt.Sprintf("%s:deploy_confirm:%s:%d", model.BuilderModuleID, pid, channelID)),
+			discord.NewSecondaryButton("キャンセル", model.BuilderModuleID+":back"),
 		),
-	})
+	))
 }
 
 // BuilderDeleteConfirm builds the delete confirmation.
 func BuilderDeleteConfirm(panelID int64, panelName string) discord.MessageUpdate {
 	pid := fmt.Sprintf("%d", panelID)
-	return discord.NewMessageUpdateV2([]discord.LayoutComponent{
-		discord.NewContainer(
-			discord.NewTextDisplay(fmt.Sprintf("**%s** を削除しますか？", panelName)),
-			discord.NewActionRow(
-				discord.NewDangerButton("削除する", model.BuilderModuleID+":delete_confirm:"+pid),
-				discord.NewSecondaryButton("キャンセル", fmt.Sprintf("%s:select:%s", model.BuilderModuleID, pid)),
-			),
+	return discord.NewMessageUpdateV2(discord.NewContainer(
+		discord.NewTextDisplay(fmt.Sprintf("**%s** を削除しますか？", panelName)),
+		discord.NewActionRow(
+			discord.NewDangerButton("削除する", model.BuilderModuleID+":delete_confirm:"+pid),
+			discord.NewSecondaryButton("キャンセル", fmt.Sprintf("%s:select:%s", model.BuilderModuleID, pid)),
 		),
-	})
+	))
 }

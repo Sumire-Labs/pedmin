@@ -47,9 +47,7 @@ func LevelingRewardsTab(rewards []model.LevelRoleReward) discord.MessageUpdate {
 		),
 	)
 
-	return discord.NewMessageUpdateV2([]discord.LayoutComponent{
-		discord.NewContainer(components...),
-	})
+	return discord.NewMessageUpdateV2(discord.NewContainer(components...))
 }
 
 // LevelingRewardManagePanel builds the reward list for selection.
@@ -76,13 +74,11 @@ func LevelingRewardManagePanel(rewards []model.LevelRoleReward) discord.MessageC
 
 // LevelingRewardDetail builds the reward detail view with delete button.
 func LevelingRewardDetail(reward model.LevelRoleReward) discord.MessageUpdate {
-	return discord.NewMessageUpdateV2([]discord.LayoutComponent{
-		discord.NewContainer(
-			discord.NewTextDisplay(fmt.Sprintf("### Lv.%d → <@&%d>", reward.Level, reward.RoleID)),
-			discord.NewLargeSeparator(),
-			discord.NewActionRow(
-				discord.NewDangerButton("削除", fmt.Sprintf("%s:reward_remove:%d", model.LevelingModuleID, reward.ID)),
-			),
+	return discord.NewMessageUpdateV2(discord.NewContainer(
+		discord.NewTextDisplay(fmt.Sprintf("### Lv.%d → <@&%d>", reward.Level, reward.RoleID)),
+		discord.NewLargeSeparator(),
+		discord.NewActionRow(
+			discord.NewDangerButton("削除", fmt.Sprintf("%s:reward_remove:%d", model.LevelingModuleID, reward.ID)),
 		),
-	})
+	))
 }

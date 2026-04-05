@@ -37,9 +37,7 @@ func (h *PlayerHandler) handleModal(e *events.ModalSubmitInteractionCreate) {
 	sendFollowup := func(text string) {
 		_, _ = e.Client().Rest.UpdateInteractionResponse(
 			e.ApplicationID(), e.Token(),
-			discord.NewMessageUpdateV2([]discord.LayoutComponent{
-				discord.NewContainer(discord.NewTextDisplay(text)),
-			}),
+			discord.NewMessageUpdateV2(discord.NewContainer(discord.NewTextDisplay(text))),
 		)
 	}
 

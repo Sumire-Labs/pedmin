@@ -46,7 +46,7 @@ func (h *EmbedFixHandler) handleTranslate(e *events.ComponentInteractionCreate, 
 	}
 
 	_, _ = e.Client().Rest.UpdateInteractionResponse(e.ApplicationID(), e.Token(),
-		discord.NewMessageUpdateV2(components))
+		discord.NewMessageUpdateV2(components...))
 }
 
 func (h *EmbedFixHandler) handlePlatformSettings(e *events.ComponentInteractionCreate) {
@@ -85,9 +85,7 @@ func (h *EmbedFixHandler) handlePlatformSettings(e *events.ComponentInteractionC
 
 func (h *EmbedFixHandler) respondTranslateError(e *events.ComponentInteractionCreate, msg string) {
 	_, _ = e.Client().Rest.UpdateInteractionResponse(e.ApplicationID(), e.Token(),
-		discord.NewMessageUpdateV2([]discord.LayoutComponent{
-			discord.NewContainer(
-				discord.NewTextDisplay(msg),
-			),
-		}))
+		discord.NewMessageUpdateV2(discord.NewContainer(
+			discord.NewTextDisplay(msg),
+		)))
 }
