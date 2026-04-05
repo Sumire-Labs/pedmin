@@ -31,7 +31,10 @@ func BuildTweetComponents(tweet *model.Tweet, ref model.EmbedRef, text, footerOv
 			discord.NewTextDisplay(fmt.Sprintf("**%s** [@%s](https://x.com/%s)", tweet.Author.Name, tweet.Author.ScreenName, tweet.Author.ScreenName)),
 		).WithAccessory(discord.NewThumbnail(tweet.Author.AvatarURL)),
 		discord.NewSmallSeparator(),
-		discord.NewTextDisplay(text),
+	}
+
+	if text != "" {
+		components = append(components, discord.NewTextDisplay(text))
 	}
 
 	if len(tweet.Media) > 0 {
