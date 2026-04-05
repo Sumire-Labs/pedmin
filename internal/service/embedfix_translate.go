@@ -22,6 +22,8 @@ func (s *EmbedFixService) TranslateContent(ctx context.Context, platform, params
 		return s.translateRedditContent(ctx, params)
 	case model.PlatformTikTok:
 		return s.translateTikTokContent(ctx, params)
+	case model.PlatformYouTube:
+		return s.translateYouTubeContent(ctx, params)
 	default:
 		// Backwards compatibility: old format where platform is actually screenName
 		return s.translateTwitterContent(ctx, platform+":"+params)
@@ -87,4 +89,21 @@ func (s *EmbedFixService) translateTikTokContent(ctx context.Context, params str
 
 	ref := model.EmbedRef{Platform: model.PlatformTikTok, Params: []string{username, videoID}}
 	return view.BuildTikTokEmbedTranslated(video, result, ref), nil
+}
+
+func (s *EmbedFixService) translateYouTubeContent(ctx context.Context, params string) ([]discord.LayoutComponent, error) {
+	videoID := params
+
+	video, err := s.youtubeClient.GetVideo(ctx, videoID)
+	if err != nil {
+		return nil, fmt.Errorf("failed to fetch youtube video: %w", err)
+	}
+
+	result, err := s.translateClient.Translate(ctx, video.Title, "ja")
+	if err != nil {
+		return nil, fmt.Errorf("failed to translate: %w", err)
+	}
+
+	ref := model.EmbedRef{Platform: model.PlatformYouTube, Params: []string{videoID}}
+	return view.BuildYouTubeEmbedTranslated(video, result, ref), nil
 }

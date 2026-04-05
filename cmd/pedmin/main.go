@@ -73,10 +73,11 @@ func main() {
 	twitterClient := client.NewFxTwitterClient(config.DefaultHTTPClientTimeout)
 	redditClient := client.NewRedditClient(config.DefaultHTTPClientTimeout)
 	tiktokClient := client.NewTikTokClient(config.DefaultHTTPClientTimeout)
+	youtubeClient := client.NewInvidiousClient(cfg.InvidiousURL, config.DefaultHTTPClientTimeout)
 	deeplClient := deepl.NewTranslateClient(cfg.DeepLAPIKey, config.DefaultHTTPClientTimeout)
 
 	embedfixSvc := service.NewEmbedFixService(
-		guildStore, twitterClient, redditClient, tiktokClient,
+		guildStore, twitterClient, redditClient, tiktokClient, youtubeClient,
 		deeplClient, b.Client, logger,
 	)
 	embedfixHandler := handler.NewEmbedFixHandler(b, embedfixSvc, logger)

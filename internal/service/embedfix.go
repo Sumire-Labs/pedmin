@@ -23,6 +23,7 @@ type EmbedFixService struct {
 	twitterClient   *client.FxTwitterClient
 	redditClient    *client.RedditClient
 	tiktokClient    *client.TikTokClient
+	youtubeClient   *client.InvidiousClient
 	translateClient *deepl.TranslateClient
 	discordClient   *disgobot.Client
 	logger          *slog.Logger
@@ -34,6 +35,7 @@ func NewEmbedFixService(
 	twitterClient *client.FxTwitterClient,
 	redditClient *client.RedditClient,
 	tiktokClient *client.TikTokClient,
+	youtubeClient *client.InvidiousClient,
 	translateClient *deepl.TranslateClient,
 	discordClient *disgobot.Client,
 	logger *slog.Logger,
@@ -43,6 +45,7 @@ func NewEmbedFixService(
 		twitterClient:   twitterClient,
 		redditClient:    redditClient,
 		tiktokClient:    tiktokClient,
+		youtubeClient:   youtubeClient,
 		translateClient: translateClient,
 		discordClient:   discordClient,
 		logger:          logger,
@@ -107,6 +110,8 @@ func (s *EmbedFixService) ProcessMessageURLs(ctx context.Context, guildID, chann
 			s.processRedditEmbed(ctx, channelID, messageID, ref)
 		case model.PlatformTikTok:
 			s.processTikTokEmbed(ctx, channelID, messageID, ref)
+		case model.PlatformYouTube:
+			s.processYouTubeEmbed(ctx, channelID, messageID, ref)
 		}
 	}
 }
@@ -171,6 +176,27 @@ func (s *EmbedFixService) processTikTokEmbed(ctx context.Context, channelID, mes
 	msg := view.BuildTikTokEmbed(video, ref)
 	if _, err = s.discordClient.Rest.CreateMessage(channelID, msg.WithMessageReferenceByID(messageID).WithAllowedMentions(&discord.AllowedMentions{})); err != nil {
 		s.logger.Warn("failed to send tiktok embed",
+			slog.String("video_id", videoID),
+			slog.Any("error", err),
+		)
+	}
+}
+
+func (s *EmbedFixService) processYouTubeEmbed(ctx context.Context, channelID, messageID snowflake.ID, ref model.EmbedRef) {
+	videoID := ref.Params[0]
+
+	video, err := s.youtubeClient.GetVideo(ctx, videoID)
+	if err != nil {
+		s.logger.Warn("failed to fetch youtube video",
+			slog.String("video_id", videoID),
+			slog.Any("error", err),
+		)
+		return
+	}
+
+	msg := view.BuildYouTubeEmbed(video, ref)
+	if _, err = s.discordClient.Rest.CreateMessage(channelID, msg.WithMessageReferenceByID(messageID).WithAllowedMentions(&discord.AllowedMentions{})); err != nil {
+		s.logger.Warn("failed to send youtube embed",
 			slog.String("video_id", videoID),
 			slog.Any("error", err),
 		)

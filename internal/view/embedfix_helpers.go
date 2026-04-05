@@ -22,7 +22,22 @@ const (
 	emojiTikTok = "<:tiktok:1485288359289946223>"
 	emojiPlay   = "<:play:1485288373047263424>"
 	emojiShare  = "<:send:1485288382509875231>"
+
+	// YouTube
+	emojiYouTube = "<:youtube:1490344291271311612>"
+	emojiGood    = "<:good:1490344375744598077>"
 )
+
+// FormatSeconds formats a duration in seconds as m:ss or h:mm:ss.
+func FormatSeconds(totalSeconds int) string {
+	hours := totalSeconds / 3600
+	minutes := (totalSeconds % 3600) / 60
+	seconds := totalSeconds % 60
+	if hours > 0 {
+		return fmt.Sprintf("%d:%02d:%02d", hours, minutes, seconds)
+	}
+	return fmt.Sprintf("%d:%02d", minutes, seconds)
+}
 
 // FormatCount formats large numbers using Japanese units (K, 万, 億).
 func FormatCount(n int) string {

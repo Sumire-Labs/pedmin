@@ -12,6 +12,7 @@ const (
 	PlatformTwitter Platform = "twitter"
 	PlatformReddit  Platform = "reddit"
 	PlatformTikTok  Platform = "tiktok"
+	PlatformYouTube Platform = "youtube"
 )
 
 // EmbedRef represents a detected SNS URL with platform-specific parameters.
@@ -33,6 +34,7 @@ var AllPlatforms = []struct {
 	{PlatformTwitter, "X / Twitter"},
 	{PlatformReddit, "Reddit"},
 	{PlatformTikTok, "TikTok"},
+	{PlatformYouTube, "YouTube"},
 }
 
 // DefaultEmbedFixSettings returns settings with all platforms enabled.
@@ -55,9 +57,10 @@ func (s *EmbedFixSettings) IsPlatformEnabled(p Platform) bool {
 
 // URL regex matchers for embed URL extraction.
 var (
-	TweetURLRegex  = regexp.MustCompile(`https?://(?:www\.)?(?:twitter\.com|x\.com)/(\w+)/status/(\d+)`)
-	RedditURLRegex = regexp.MustCompile(`https?://(?:www\.|old\.|new\.)?reddit\.com/r/(\w+)/comments/(\w+)`)
-	TikTokURLRegex = regexp.MustCompile(`https?://(?:www\.)?tiktok\.com/@([\w.]+)/video/(\d+)`)
+	TweetURLRegex   = regexp.MustCompile(`https?://(?:www\.)?(?:twitter\.com|x\.com)/(\w+)/status/(\d+)`)
+	RedditURLRegex  = regexp.MustCompile(`https?://(?:www\.|old\.|new\.)?reddit\.com/r/(\w+)/comments/(\w+)`)
+	TikTokURLRegex  = regexp.MustCompile(`https?://(?:www\.)?tiktok\.com/@([\w.]+)/video/(\d+)`)
+	YouTubeURLRegex = regexp.MustCompile(`https?://(?:(?:www\.|m\.)?youtube\.com/(?:watch\?v=|shorts/|live/)|youtu\.be/)([\w-]{11})`)
 )
 
 // MaxEmbedURLs limits total embed URLs processed per message.
@@ -74,6 +77,7 @@ var URLMatchers = []URLMatcher{
 	{TweetURLRegex, PlatformTwitter},
 	{RedditURLRegex, PlatformReddit},
 	{TikTokURLRegex, PlatformTikTok},
+	{YouTubeURLRegex, PlatformYouTube},
 }
 
 // ExtractEmbedURLs extracts SNS URLs from message content.
