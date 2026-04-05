@@ -34,6 +34,7 @@ type fxTweet struct {
 	Text            string   `json:"text"`
 	Author          fxAuthor `json:"author"`
 	Media           *fxMedia `json:"media"`
+	Quote           *fxTweet `json:"quote"`
 	Replies         int      `json:"replies"`
 	Retweets        int      `json:"retweets"`
 	Likes           int      `json:"likes"`
@@ -126,6 +127,28 @@ func (c *FxTwitterClient) GetTweet(ctx context.Context, screenName, tweetID stri
 				ThumbnailURL: v.ThumbnailURL,
 			})
 		}
+	}
+
+	if q := fxResp.Tweet.Quote; q != nil {
+		quote := &model.Tweet{
+			Text: q.Text,
+			Author: model.TweetAuthor{
+				Name:       q.Author.Name,
+				ScreenName: q.Author.ScreenName,
+				AvatarURL:  q.Author.AvatarURL,
+			},
+			CreatedAt: parseTwitterTime(q.CreatedAt, q.CreatedTimestamp),
+			Lang:      q.Lang,
+		}
+		if q.Media != nil {
+			for _, p := range q.Media.Photos {
+				quote.Media = append(quote.Media, model.TweetMedia{Type: "photo", URL: p.URL})
+			}
+			for _, v := range q.Media.Videos {
+				quote.Media = append(quote.Media, model.TweetMedia{Type: "video", URL: v.URL, ThumbnailURL: v.ThumbnailURL})
+			}
+		}
+		tweet.Quote = quote
 	}
 
 	return tweet, nil

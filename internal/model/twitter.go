@@ -10,6 +10,7 @@ type Tweet struct {
 	Text      string
 	Author    TweetAuthor
 	Media     []TweetMedia
+	Quote     *Tweet
 	Replies   int
 	Retweets  int
 	Likes     int

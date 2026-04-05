@@ -47,6 +47,26 @@ func BuildTweetComponents(tweet *model.Tweet, ref model.EmbedRef, text, footerOv
 		components = append(components, discord.NewMediaGallery(items...))
 	}
 
+	if tweet.Quote != nil {
+		components = append(components,
+			discord.NewSmallSeparator(),
+			discord.NewTextDisplay(fmt.Sprintf("%s 引用", emojiRepost)),
+			discord.NewTextDisplay(fmt.Sprintf("**%s** @%s", tweet.Quote.Author.Name, tweet.Quote.Author.ScreenName)),
+		)
+		if tweet.Quote.Text != "" {
+			components = append(components, discord.NewTextDisplay(tweet.Quote.Text))
+		}
+		if len(tweet.Quote.Media) > 0 {
+			items := make([]discord.MediaGalleryItem, 0, len(tweet.Quote.Media))
+			for _, m := range tweet.Quote.Media {
+				items = append(items, discord.MediaGalleryItem{
+					Media: discord.UnfurledMediaItem{URL: m.URL},
+				})
+			}
+			components = append(components, discord.NewMediaGallery(items...))
+		}
+	}
+
 	components = append(components, discord.NewSmallSeparator())
 
 	stats := fmt.Sprintf("%s %s  %s %s  %s %s  %s %s",
