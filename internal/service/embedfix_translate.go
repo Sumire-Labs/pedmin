@@ -35,10 +35,82 @@ func (s *EmbedFixService) IsTranslationAvailable() bool {
 	return s.translateClient.IsAvailable()
 }
 
+// RevertContent fetches original content for the given platform and returns original embed components.
+func (s *EmbedFixService) RevertContent(ctx context.Context, platform, params string) ([]discord.LayoutComponent, error) {
+	switch model.Platform(platform) {
+	case model.PlatformTwitter:
+		return s.revertTwitterContent(ctx, params)
+	case model.PlatformReddit:
+		return s.revertRedditContent(ctx, params)
+	case model.PlatformTikTok:
+		return s.revertTikTokContent(ctx, params)
+	case model.PlatformYouTube:
+		return s.revertYouTubeContent(ctx, params)
+	default:
+		return nil, fmt.Errorf("unsupported platform: %s", platform)
+	}
+}
+
+// fetchTweet returns a cached tweet or fetches from the API.
+func (s *EmbedFixService) fetchTweet(ctx context.Context, screenName, tweetID string) (*model.Tweet, error) {
+	key := string(model.PlatformTwitter) + ":" + screenName + ":" + tweetID
+	if cached, ok := s.cache.get(key); ok {
+		return cached.(*model.Tweet), nil
+	}
+	tweet, err := s.twitterClient.GetTweet(ctx, screenName, tweetID)
+	if err != nil {
+		return nil, err
+	}
+	s.cache.set(key, tweet)
+	return tweet, nil
+}
+
+// fetchRedditPost returns a cached post or fetches from the API.
+func (s *EmbedFixService) fetchRedditPost(ctx context.Context, subreddit, postID string) (*model.RedditPost, error) {
+	key := string(model.PlatformReddit) + ":" + subreddit + ":" + postID
+	if cached, ok := s.cache.get(key); ok {
+		return cached.(*model.RedditPost), nil
+	}
+	post, err := s.redditClient.GetPost(ctx, subreddit, postID)
+	if err != nil {
+		return nil, err
+	}
+	s.cache.set(key, post)
+	return post, nil
+}
+
+// fetchTikTokVideo returns a cached video or fetches from the API.
+func (s *EmbedFixService) fetchTikTokVideo(ctx context.Context, username, videoID string) (*model.TikTokVideo, error) {
+	key := string(model.PlatformTikTok) + ":" + username + ":" + videoID
+	if cached, ok := s.cache.get(key); ok {
+		return cached.(*model.TikTokVideo), nil
+	}
+	video, err := s.tiktokClient.GetVideo(ctx, username, videoID)
+	if err != nil {
+		return nil, err
+	}
+	s.cache.set(key, video)
+	return video, nil
+}
+
+// fetchYouTubeVideo returns a cached video or fetches from the API.
+func (s *EmbedFixService) fetchYouTubeVideo(ctx context.Context, videoID string) (*model.YouTubeVideo, error) {
+	key := string(model.PlatformYouTube) + ":" + videoID
+	if cached, ok := s.cache.get(key); ok {
+		return cached.(*model.YouTubeVideo), nil
+	}
+	video, err := s.youtubeClient.GetVideo(ctx, videoID)
+	if err != nil {
+		return nil, err
+	}
+	s.cache.set(key, video)
+	return video, nil
+}
+
 func (s *EmbedFixService) translateTwitterContent(ctx context.Context, params string) ([]discord.LayoutComponent, error) {
 	screenName, tweetID, _ := strings.Cut(params, ":")
 
-	tweet, err := s.twitterClient.GetTweet(ctx, screenName, tweetID)
+	tweet, err := s.fetchTweet(ctx, screenName, tweetID)
 	if err != nil {
 		return nil, fmt.Errorf("failed to fetch tweet: %w", err)
 	}
@@ -55,7 +127,7 @@ func (s *EmbedFixService) translateTwitterContent(ctx context.Context, params st
 func (s *EmbedFixService) translateRedditContent(ctx context.Context, params string) ([]discord.LayoutComponent, error) {
 	subreddit, postID, _ := strings.Cut(params, ":")
 
-	post, err := s.redditClient.GetPost(ctx, subreddit, postID)
+	post, err := s.fetchRedditPost(ctx, subreddit, postID)
 	if err != nil {
 		return nil, fmt.Errorf("failed to fetch reddit post: %w", err)
 	}
@@ -77,7 +149,7 @@ func (s *EmbedFixService) translateRedditContent(ctx context.Context, params str
 func (s *EmbedFixService) translateTikTokContent(ctx context.Context, params string) ([]discord.LayoutComponent, error) {
 	username, videoID, _ := strings.Cut(params, ":")
 
-	video, err := s.tiktokClient.GetVideo(ctx, username, videoID)
+	video, err := s.fetchTikTokVideo(ctx, username, videoID)
 	if err != nil {
 		return nil, fmt.Errorf("failed to fetch tiktok video: %w", err)
 	}
@@ -91,74 +163,10 @@ func (s *EmbedFixService) translateTikTokContent(ctx context.Context, params str
 	return view.BuildTikTokEmbedTranslated(video, result, ref), nil
 }
 
-// RevertContent fetches original content for the given platform and returns original embed components.
-func (s *EmbedFixService) RevertContent(ctx context.Context, platform, params string) ([]discord.LayoutComponent, error) {
-	switch model.Platform(platform) {
-	case model.PlatformTwitter:
-		return s.revertTwitterContent(ctx, params)
-	case model.PlatformReddit:
-		return s.revertRedditContent(ctx, params)
-	case model.PlatformTikTok:
-		return s.revertTikTokContent(ctx, params)
-	case model.PlatformYouTube:
-		return s.revertYouTubeContent(ctx, params)
-	default:
-		return nil, fmt.Errorf("unsupported platform: %s", platform)
-	}
-}
-
-func (s *EmbedFixService) revertTwitterContent(ctx context.Context, params string) ([]discord.LayoutComponent, error) {
-	screenName, tweetID, _ := strings.Cut(params, ":")
-
-	tweet, err := s.twitterClient.GetTweet(ctx, screenName, tweetID)
-	if err != nil {
-		return nil, fmt.Errorf("failed to fetch tweet: %w", err)
-	}
-
-	ref := model.EmbedRef{Platform: model.PlatformTwitter, Params: []string{screenName, tweetID}}
-	return view.BuildTweetEmbedOriginal(tweet, ref), nil
-}
-
-func (s *EmbedFixService) revertRedditContent(ctx context.Context, params string) ([]discord.LayoutComponent, error) {
-	subreddit, postID, _ := strings.Cut(params, ":")
-
-	post, err := s.redditClient.GetPost(ctx, subreddit, postID)
-	if err != nil {
-		return nil, fmt.Errorf("failed to fetch reddit post: %w", err)
-	}
-
-	ref := model.EmbedRef{Platform: model.PlatformReddit, Params: []string{subreddit, postID}}
-	return view.BuildRedditEmbedOriginal(post, ref), nil
-}
-
-func (s *EmbedFixService) revertTikTokContent(ctx context.Context, params string) ([]discord.LayoutComponent, error) {
-	username, videoID, _ := strings.Cut(params, ":")
-
-	video, err := s.tiktokClient.GetVideo(ctx, username, videoID)
-	if err != nil {
-		return nil, fmt.Errorf("failed to fetch tiktok video: %w", err)
-	}
-
-	ref := model.EmbedRef{Platform: model.PlatformTikTok, Params: []string{username, videoID}}
-	return view.BuildTikTokEmbedOriginal(video, ref), nil
-}
-
-func (s *EmbedFixService) revertYouTubeContent(ctx context.Context, params string) ([]discord.LayoutComponent, error) {
-	videoID := params
-
-	video, err := s.youtubeClient.GetVideo(ctx, videoID)
-	if err != nil {
-		return nil, fmt.Errorf("failed to fetch youtube video: %w", err)
-	}
-
-	ref := model.EmbedRef{Platform: model.PlatformYouTube, Params: []string{videoID}}
-	return view.BuildYouTubeEmbedOriginal(video, ref), nil
-}
-
 func (s *EmbedFixService) translateYouTubeContent(ctx context.Context, params string) ([]discord.LayoutComponent, error) {
 	videoID := params
 
-	video, err := s.youtubeClient.GetVideo(ctx, videoID)
+	video, err := s.fetchYouTubeVideo(ctx, videoID)
 	if err != nil {
 		return nil, fmt.Errorf("failed to fetch youtube video: %w", err)
 	}
@@ -170,4 +178,52 @@ func (s *EmbedFixService) translateYouTubeContent(ctx context.Context, params st
 
 	ref := model.EmbedRef{Platform: model.PlatformYouTube, Params: []string{videoID}}
 	return view.BuildYouTubeEmbedTranslated(video, result, ref), nil
+}
+
+func (s *EmbedFixService) revertTwitterContent(ctx context.Context, params string) ([]discord.LayoutComponent, error) {
+	screenName, tweetID, _ := strings.Cut(params, ":")
+
+	tweet, err := s.fetchTweet(ctx, screenName, tweetID)
+	if err != nil {
+		return nil, fmt.Errorf("failed to fetch tweet: %w", err)
+	}
+
+	ref := model.EmbedRef{Platform: model.PlatformTwitter, Params: []string{screenName, tweetID}}
+	return view.BuildTweetEmbedOriginal(tweet, ref), nil
+}
+
+func (s *EmbedFixService) revertRedditContent(ctx context.Context, params string) ([]discord.LayoutComponent, error) {
+	subreddit, postID, _ := strings.Cut(params, ":")
+
+	post, err := s.fetchRedditPost(ctx, subreddit, postID)
+	if err != nil {
+		return nil, fmt.Errorf("failed to fetch reddit post: %w", err)
+	}
+
+	ref := model.EmbedRef{Platform: model.PlatformReddit, Params: []string{subreddit, postID}}
+	return view.BuildRedditEmbedOriginal(post, ref), nil
+}
+
+func (s *EmbedFixService) revertTikTokContent(ctx context.Context, params string) ([]discord.LayoutComponent, error) {
+	username, videoID, _ := strings.Cut(params, ":")
+
+	video, err := s.fetchTikTokVideo(ctx, username, videoID)
+	if err != nil {
+		return nil, fmt.Errorf("failed to fetch tiktok video: %w", err)
+	}
+
+	ref := model.EmbedRef{Platform: model.PlatformTikTok, Params: []string{username, videoID}}
+	return view.BuildTikTokEmbedOriginal(video, ref), nil
+}
+
+func (s *EmbedFixService) revertYouTubeContent(ctx context.Context, params string) ([]discord.LayoutComponent, error) {
+	videoID := params
+
+	video, err := s.fetchYouTubeVideo(ctx, videoID)
+	if err != nil {
+		return nil, fmt.Errorf("failed to fetch youtube video: %w", err)
+	}
+
+	ref := model.EmbedRef{Platform: model.PlatformYouTube, Params: []string{videoID}}
+	return view.BuildYouTubeEmbedOriginal(video, ref), nil
 }

@@ -6,6 +6,8 @@ package service
 import (
 	"context"
 	"log/slog"
+	"sync"
+	"time"
 
 	disgobot "github.com/disgoorg/disgo/bot"
 	"github.com/disgoorg/disgo/discord"
@@ -17,6 +19,35 @@ import (
 	"github.com/Sumire-Labs/pedmin/pkg/deepl"
 )
 
+const embedCacheTTL = 5 * time.Minute
+
+type cacheEntry struct {
+	data      any
+	expiresAt time.Time
+}
+
+type embedCache struct {
+	mu      sync.Mutex
+	entries map[string]cacheEntry
+}
+
+func (c *embedCache) get(key string) (any, bool) {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+	e, ok := c.entries[key]
+	if !ok || time.Now().After(e.expiresAt) {
+		delete(c.entries, key)
+		return nil, false
+	}
+	return e.data, true
+}
+
+func (c *embedCache) set(key string, data any) {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+	c.entries[key] = cacheEntry{data: data, expiresAt: time.Now().Add(embedCacheTTL)}
+}
+
 // EmbedFixService handles URL processing, platform-specific embed sending, and embed suppression.
 type EmbedFixService struct {
 	store           repository.GuildStore
@@ -27,6 +58,7 @@ type EmbedFixService struct {
 	translateClient *deepl.TranslateClient
 	discordClient   *disgobot.Client
 	logger          *slog.Logger
+	cache           embedCache
 }
 
 // NewEmbedFixService creates a new EmbedFixService.
@@ -49,6 +81,7 @@ func NewEmbedFixService(
 		translateClient: translateClient,
 		discordClient:   discordClient,
 		logger:          logger,
+		cache:           embedCache{entries: make(map[string]cacheEntry)},
 	}
 }
 
@@ -110,7 +143,7 @@ func (s *EmbedFixService) ProcessMessageURLs(ctx context.Context, guildID, chann
 func (s *EmbedFixService) processTwitterEmbed(ctx context.Context, channelID, messageID snowflake.ID, ref model.EmbedRef) {
 	screenName, tweetID := ref.Params[0], ref.Params[1]
 
-	tweet, err := s.twitterClient.GetTweet(ctx, screenName, tweetID)
+	tweet, err := s.fetchTweet(ctx, screenName, tweetID)
 	if err != nil {
 		s.logger.Warn("failed to fetch tweet",
 			slog.String("screen_name", screenName),
@@ -134,7 +167,7 @@ func (s *EmbedFixService) processTwitterEmbed(ctx context.Context, channelID, me
 func (s *EmbedFixService) processRedditEmbed(ctx context.Context, channelID, messageID snowflake.ID, ref model.EmbedRef) {
 	subreddit, postID := ref.Params[0], ref.Params[1]
 
-	post, err := s.redditClient.GetPost(ctx, subreddit, postID)
+	post, err := s.fetchRedditPost(ctx, subreddit, postID)
 	if err != nil {
 		s.logger.Warn("failed to fetch reddit post",
 			slog.String("subreddit", subreddit),
@@ -158,7 +191,7 @@ func (s *EmbedFixService) processRedditEmbed(ctx context.Context, channelID, mes
 func (s *EmbedFixService) processTikTokEmbed(ctx context.Context, channelID, messageID snowflake.ID, ref model.EmbedRef) {
 	username, videoID := ref.Params[0], ref.Params[1]
 
-	video, err := s.tiktokClient.GetVideo(ctx, username, videoID)
+	video, err := s.fetchTikTokVideo(ctx, username, videoID)
 	if err != nil {
 		s.logger.Warn("failed to fetch tiktok video",
 			slog.String("username", username),
@@ -182,7 +215,7 @@ func (s *EmbedFixService) processTikTokEmbed(ctx context.Context, channelID, mes
 func (s *EmbedFixService) processYouTubeEmbed(ctx context.Context, channelID, messageID snowflake.ID, ref model.EmbedRef) {
 	videoID := ref.Params[0]
 
-	video, err := s.youtubeClient.GetVideo(ctx, videoID)
+	video, err := s.fetchYouTubeVideo(ctx, videoID)
 	if err != nil {
 		s.logger.Warn("failed to fetch youtube video",
 			slog.String("video_id", videoID),
