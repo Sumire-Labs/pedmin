@@ -67,8 +67,8 @@ func (h *EmbedFixHandler) handlePlatformSettings(e *events.ComponentInteractionC
 	}
 
 	// Disable all, then enable selected
-	for k := range settings.Platforms {
-		settings.Platforms[k] = false
+	for _, p := range model.AllPlatforms {
+		settings.Platforms[p.Key] = false
 	}
 	for _, v := range data.Values {
 		settings.Platforms[model.Platform(v)] = true

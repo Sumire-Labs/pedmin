@@ -93,15 +93,6 @@ func (s *EmbedFixService) ProcessMessageURLs(ctx context.Context, guildID, chann
 		return
 	}
 
-	// Suppress embeds on the original message (best-effort)
-	if _, err := s.discordClient.Rest.UpdateMessage(channelID, messageID,
-		discord.NewMessageUpdate().WithSuppressEmbeds(true)); err != nil {
-		s.logger.Debug("failed to suppress embeds",
-			slog.Any("error", err),
-			slog.String("message_id", messageID.String()),
-		)
-	}
-
 	for _, ref := range enabledRefs {
 		switch ref.Platform {
 		case model.PlatformTwitter:
@@ -129,6 +120,8 @@ func (s *EmbedFixService) processTwitterEmbed(ctx context.Context, channelID, me
 		return
 	}
 
+	s.suppressEmbeds(channelID, messageID)
+
 	msg := view.BuildTweetEmbed(tweet, ref)
 	if _, err = s.discordClient.Rest.CreateMessage(channelID, msg.WithMessageReferenceByID(messageID).WithAllowedMentions(&discord.AllowedMentions{})); err != nil {
 		s.logger.Warn("failed to send tweet embed",
@@ -150,6 +143,8 @@ func (s *EmbedFixService) processRedditEmbed(ctx context.Context, channelID, mes
 		)
 		return
 	}
+
+	s.suppressEmbeds(channelID, messageID)
 
 	msg := view.BuildRedditEmbed(post, ref)
 	if _, err = s.discordClient.Rest.CreateMessage(channelID, msg.WithMessageReferenceByID(messageID).WithAllowedMentions(&discord.AllowedMentions{})); err != nil {
@@ -173,6 +168,8 @@ func (s *EmbedFixService) processTikTokEmbed(ctx context.Context, channelID, mes
 		return
 	}
 
+	s.suppressEmbeds(channelID, messageID)
+
 	msg := view.BuildTikTokEmbed(video, ref)
 	if _, err = s.discordClient.Rest.CreateMessage(channelID, msg.WithMessageReferenceByID(messageID).WithAllowedMentions(&discord.AllowedMentions{})); err != nil {
 		s.logger.Warn("failed to send tiktok embed",
@@ -194,11 +191,23 @@ func (s *EmbedFixService) processYouTubeEmbed(ctx context.Context, channelID, me
 		return
 	}
 
+	s.suppressEmbeds(channelID, messageID)
+
 	msg := view.BuildYouTubeEmbed(video, ref)
 	if _, err = s.discordClient.Rest.CreateMessage(channelID, msg.WithMessageReferenceByID(messageID).WithAllowedMentions(&discord.AllowedMentions{})); err != nil {
 		s.logger.Warn("failed to send youtube embed",
 			slog.String("video_id", videoID),
 			slog.Any("error", err),
+		)
+	}
+}
+
+func (s *EmbedFixService) suppressEmbeds(channelID, messageID snowflake.ID) {
+	if _, err := s.discordClient.Rest.UpdateMessage(channelID, messageID,
+		discord.NewMessageUpdate().WithSuppressEmbeds(true)); err != nil {
+		s.logger.Debug("failed to suppress embeds",
+			slog.Any("error", err),
+			slog.String("message_id", messageID.String()),
 		)
 	}
 }

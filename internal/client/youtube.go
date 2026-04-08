@@ -52,8 +52,7 @@ type invidiousThumbnail struct {
 
 // GetVideo fetches video data from the Invidious API.
 func (c *InvidiousClient) GetVideo(ctx context.Context, videoID string) (*model.YouTubeVideo, error) {
-	endpoint := fmt.Sprintf("%s/api/v1/videos/%s?fields=title,videoId,author,authorId,authorThumbnails,viewCount,likeCount,lengthSeconds,published,videoThumbnails,liveNow",
-		c.baseURL, videoID)
+	endpoint := fmt.Sprintf("%s/api/v1/videos/%s", c.baseURL, videoID)
 
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, endpoint, nil)
 	if err != nil {
