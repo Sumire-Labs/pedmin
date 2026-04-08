@@ -23,7 +23,7 @@ https://discord.com/oauth2/authorize?client_id=1484236709611704571
 - **サポートチケット** — Ticket Toolの代替として作成されたサポートチケット機能、設定パネルから有効化できます
 - **サーバーログ** — 既存の多機能BOTのloggerの代替として作成されたイベントログ機能
 - **RSS フィード** — MonitoRSSの代替として作成されたRSSフィード監視・自動アナウンス機能
-- **Embed Fix** — 既存のEmbed修正BOTの代替、現在X / Tiktok / Redditが対応
+- **Embed Fix** — 既存のEmbed修正BOTの代替、現在X / Tiktok / Reddit / Youtubeが対応
 - **Tlanslator** — メッセージに国旗の絵文字でリアクションすると、その言語に翻訳します
 - **サーバーパネル** — `/panel` Pelicanパネルの操作用 (限定されたユーザーのみ)
 - **URL ツール** — `/url` URL短縮（x.gd）& 安全スキャン（VirusTotal）

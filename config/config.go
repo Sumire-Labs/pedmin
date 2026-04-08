@@ -76,7 +76,7 @@ func Load() (*Config, error) {
 		DeepLAPIKey:      os.Getenv("DEEPL_API_KEY"),
 		XGDAPIKey:        os.Getenv("XGD_API_KEY"),
 		VTAPIKey:         os.Getenv("VT_API_KEY"),
-		InvidiousURL:     envOrDefault("INVIDIOUS_URL", "https://inv.nadeko.net"),
+		InvidiousURL:     envOrDefault("INVIDIOUS_URL", "https://invidious.protokolla.fi"),
 		PanelAPIKey:      os.Getenv("PANEL_API_KEY"),
 		PanelURL:         os.Getenv("PANEL_URL"),
 		PanelAllowedUsers: parseSnowflakeList(os.Getenv("PANEL_ALLOWED_USERS")),
