@@ -6,26 +6,61 @@ package deepl
 
 import (
 	"context"
+	"crypto/sha256"
+	"encoding/hex"
 	"encoding/json"
 	"fmt"
 	"io"
 	"net/http"
 	"net/url"
 	"strings"
+	"sync"
 	"time"
 )
+
+const translateCacheTTL = 10 * time.Minute
+
+type cacheEntry struct {
+	result    *TranslateResult
+	expiresAt time.Time
+}
 
 // TranslateClient calls the DeepL API Free.
 type TranslateClient struct {
 	http   *http.Client
 	apiKey string
+	mu     sync.Mutex
+	cache  map[string]cacheEntry
 }
 
 func NewTranslateClient(apiKey string, timeout time.Duration) *TranslateClient {
 	return &TranslateClient{
 		http:   &http.Client{Timeout: timeout},
 		apiKey: apiKey,
+		cache:  make(map[string]cacheEntry),
 	}
+}
+
+func (c *TranslateClient) cacheKey(text, targetLang string) string {
+	h := sha256.Sum256([]byte(text + "\x00" + targetLang))
+	return hex.EncodeToString(h[:16])
+}
+
+func (c *TranslateClient) getCached(key string) (*TranslateResult, bool) {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+	e, ok := c.cache[key]
+	if !ok || time.Now().After(e.expiresAt) {
+		delete(c.cache, key)
+		return nil, false
+	}
+	return e.result, true
+}
+
+func (c *TranslateClient) setCache(key string, result *TranslateResult) {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+	c.cache[key] = cacheEntry{result: result, expiresAt: time.Now().Add(translateCacheTTL)}
 }
 
 // IsAvailable reports whether the client has a configured API key.
@@ -47,6 +82,11 @@ type deeplResponse struct {
 }
 
 func (c *TranslateClient) Translate(ctx context.Context, text, targetLang string) (*TranslateResult, error) {
+	key := c.cacheKey(text, targetLang)
+	if cached, ok := c.getCached(key); ok {
+		return cached, nil
+	}
+
 	// DeepL Free API uses api-free.deepl.com
 	endpoint := "https://api-free.deepl.com/v2/translate"
 
@@ -86,8 +126,10 @@ func (c *TranslateClient) Translate(ctx context.Context, text, targetLang string
 	}
 
 	t := dResp.Translations[0]
-	return &TranslateResult{
+	result := &TranslateResult{
 		TranslatedText:   t.Text,
 		DetectedLanguage: strings.ToUpper(t.DetectedSourceLang),
-	}, nil
+	}
+	c.setCache(key, result)
+	return result, nil
 }
