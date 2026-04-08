@@ -80,5 +80,21 @@ func BuildTikTokComponents(video *model.TikTokVideo, ref model.EmbedRef, transla
 		)
 	}
 
+	// Show revert button when translated
+	if footerOverride != "" {
+		revertID := fmt.Sprintf("%s:revert:%s:%s:%s", model.EmbedFixModuleID, model.PlatformTikTok, ref.Params[0], ref.Params[1])
+		components = append(components,
+			discord.NewActionRow(
+				discord.NewSecondaryButton("↩ 原文に戻す", revertID),
+			),
+		)
+	}
+
 	return components
+}
+
+// BuildTikTokEmbedOriginal builds the original TikTok video embed as layout components (for revert).
+func BuildTikTokEmbedOriginal(video *model.TikTokVideo, ref model.EmbedRef) []discord.LayoutComponent {
+	components := BuildTikTokComponents(video, ref, "", "")
+	return []discord.LayoutComponent{discord.NewContainer(components...)}
 }

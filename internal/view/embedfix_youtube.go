@@ -81,7 +81,23 @@ func BuildYouTubeComponents(video *model.YouTubeVideo, ref model.EmbedRef, trans
 		)
 	}
 
+	// Show revert button when translated
+	if footerOverride != "" {
+		revertID := fmt.Sprintf("%s:revert:%s:%s", model.EmbedFixModuleID, model.PlatformYouTube, ref.Params[0])
+		components = append(components,
+			discord.NewActionRow(
+				discord.NewSecondaryButton("↩ 原文に戻す", revertID),
+			),
+		)
+	}
+
 	return components
+}
+
+// BuildYouTubeEmbedOriginal builds the original YouTube video embed as layout components (for revert).
+func BuildYouTubeEmbedOriginal(video *model.YouTubeVideo, ref model.EmbedRef) []discord.LayoutComponent {
+	components := BuildYouTubeComponents(video, ref, "", "")
+	return []discord.LayoutComponent{discord.NewContainer(components...)}
 }
 
 func formatYouTubeDuration(video *model.YouTubeVideo) string {

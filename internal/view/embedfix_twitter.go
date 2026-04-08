@@ -93,5 +93,21 @@ func BuildTweetComponents(tweet *model.Tweet, ref model.EmbedRef, text, footerOv
 		)
 	}
 
+	// Show revert button when translated
+	if footerOverride != "" {
+		revertID := fmt.Sprintf("%s:revert:%s:%s:%s", model.EmbedFixModuleID, model.PlatformTwitter, ref.Params[0], ref.Params[1])
+		components = append(components,
+			discord.NewActionRow(
+				discord.NewSecondaryButton("↩ 原文に戻す", revertID),
+			),
+		)
+	}
+
 	return components
+}
+
+// BuildTweetEmbedOriginal builds the original tweet embed as layout components (for revert).
+func BuildTweetEmbedOriginal(tweet *model.Tweet, ref model.EmbedRef) []discord.LayoutComponent {
+	components := BuildTweetComponents(tweet, ref, tweet.Text, "")
+	return []discord.LayoutComponent{discord.NewContainer(components...)}
 }

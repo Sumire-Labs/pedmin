@@ -86,5 +86,21 @@ func BuildRedditComponents(post *model.RedditPost, ref model.EmbedRef, translate
 		)
 	}
 
+	// Show revert button when translated
+	if footerOverride != "" {
+		revertID := fmt.Sprintf("%s:revert:%s:%s:%s", model.EmbedFixModuleID, model.PlatformReddit, ref.Params[0], ref.Params[1])
+		components = append(components,
+			discord.NewActionRow(
+				discord.NewSecondaryButton("↩ 原文に戻す", revertID),
+			),
+		)
+	}
+
 	return components
+}
+
+// BuildRedditEmbedOriginal builds the original Reddit post embed as layout components (for revert).
+func BuildRedditEmbedOriginal(post *model.RedditPost, ref model.EmbedRef) []discord.LayoutComponent {
+	components := BuildRedditComponents(post, ref, "", "")
+	return []discord.LayoutComponent{discord.NewContainer(components...)}
 }

@@ -23,6 +23,8 @@ func (h *EmbedFixHandler) handleComponent(e *events.ComponentInteractionCreate) 
 	switch action {
 	case "translate":
 		h.handleTranslate(e, rest)
+	case "revert":
+		h.handleRevert(e, rest)
 	case "platforms":
 		h.handlePlatformSettings(e)
 	}
@@ -42,6 +44,22 @@ func (h *EmbedFixHandler) handleTranslate(e *events.ComponentInteractionCreate, 
 	components, err := h.service.TranslateContent(ctx, platform, params)
 	if err != nil {
 		h.respondTranslateError(e, "翻訳に失敗しました。")
+		return
+	}
+
+	_, _ = e.Client().Rest.UpdateInteractionResponse(e.ApplicationID(), e.Token(),
+		discord.NewMessageUpdateV2(components...))
+}
+
+func (h *EmbedFixHandler) handleRevert(e *events.ComponentInteractionCreate, rest string) {
+	_ = e.DeferUpdateMessage()
+
+	platform, params, _ := strings.Cut(rest, ":")
+	ctx := context.Background()
+
+	components, err := h.service.RevertContent(ctx, platform, params)
+	if err != nil {
+		h.respondTranslateError(e, "原文の取得に失敗しました。")
 		return
 	}
 
