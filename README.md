@@ -34,7 +34,7 @@ https://discord.com/oauth2/authorize?client_id=1484236709611704571
 
 | 技術 | バージョン / ライブラリ |
 |------|------------------------|
-| 言語 | Go 1.26.1 |
+| 言語 | Go 1.26.2 |
 | Discord | [disgo](https://github.com/disgoorg/disgo) v0.19.2 |
 | Lavalink クライアント | [disgolink](https://github.com/disgoorg/disgolink) v3.1.0 |
 | Lavalink サーバー | Lavalink 4 (Alpine) |

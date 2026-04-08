@@ -1,12 +1,12 @@
 # Pedmin - Discord Bot
 
-Pedmin (pepe + administrator) is a modular Discord bot built with Go 1.26.1 and disgo v0.19.2. It serves as a Probot
+Pedmin (pepe + administrator) is a modular Discord bot built with Go 1.26.2 and disgo v0.19.2. It serves as a Probot
 replacement, featuring Components V2 UI, music playback via Lavalink, and a standard Go layered architecture. Runs on
 Windows Docker Desktop.
 
 ## Tech Stack
 
-- **Language**: Go 1.26.1
+- **Language**: Go 1.26.2
 - **Discord Library**: disgo v0.19.2
 - **Lavalink Client**: disgolink v3.1.0
 - **Lavalink Server**: Lavalink 4 (Alpine)
