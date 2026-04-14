@@ -55,6 +55,9 @@ func main() {
 	fuckfetchHandler := handler.NewFuckfetchHandler(logger)
 	b.Register(fuckfetchHandler)
 
+	moderatorHandler := handler.NewModeratorHandler(logger)
+	b.Register(moderatorHandler)
+
 	// --- Ticket ---
 
 	ticketSvc := service.NewTicketService(b.Client, guildStore, logger)
