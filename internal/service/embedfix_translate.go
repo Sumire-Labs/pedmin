@@ -6,6 +6,7 @@ package service
 import (
 	"context"
 	"fmt"
+	"log/slog"
 	"strings"
 
 	"github.com/disgoorg/disgo/discord"
@@ -120,8 +121,18 @@ func (s *EmbedFixService) translateTwitterContent(ctx context.Context, params st
 		return nil, fmt.Errorf("failed to translate: %w", err)
 	}
 
+	var quoteText string
+	if tweet.Quote != nil && tweet.Quote.Text != "" {
+		quoteResult, qErr := s.translateClient.Translate(ctx, tweet.Quote.Text, "ja")
+		if qErr != nil {
+			s.logger.Warn("failed to translate quoted tweet", slog.Any("error", qErr))
+		} else {
+			quoteText = quoteResult.TranslatedText
+		}
+	}
+
 	ref := model.EmbedRef{Platform: model.PlatformTwitter, Params: []string{screenName, tweetID}}
-	return view.BuildTweetEmbedTranslated(tweet, result, ref), nil
+	return view.BuildTweetEmbedTranslated(tweet, result, quoteText, ref), nil
 }
 
 func (s *EmbedFixService) translateRedditContent(ctx context.Context, params string) ([]discord.LayoutComponent, error) {

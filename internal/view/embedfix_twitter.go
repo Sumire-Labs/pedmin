@@ -13,19 +13,21 @@ import (
 
 // BuildTweetEmbed builds a tweet embed message.
 func BuildTweetEmbed(tweet *model.Tweet, ref model.EmbedRef) discord.MessageCreate {
-	components := BuildTweetComponents(tweet, ref, tweet.Text, "")
+	components := BuildTweetComponents(tweet, ref, tweet.Text, "", "")
 	return discord.NewMessageCreateV2(discord.NewContainer(components...))
 }
 
 // BuildTweetEmbedTranslated builds a translated tweet embed as layout components.
-func BuildTweetEmbedTranslated(tweet *model.Tweet, result *deepl.TranslateResult, ref model.EmbedRef) []discord.LayoutComponent {
+// quoteText is the translated quoted tweet text (empty if no quote or not translated).
+func BuildTweetEmbedTranslated(tweet *model.Tweet, result *deepl.TranslateResult, quoteText string, ref model.EmbedRef) []discord.LayoutComponent {
 	footer := fmt.Sprintf("%s | <t:%d:R> · %sから翻訳", emojiX, tweet.CreatedAt.Unix(), deepl.LangName(result.DetectedLanguage))
-	components := BuildTweetComponents(tweet, ref, result.TranslatedText, footer)
+	components := BuildTweetComponents(tweet, ref, result.TranslatedText, quoteText, footer)
 	return []discord.LayoutComponent{discord.NewContainer(components...)}
 }
 
 // BuildTweetComponents builds the tweet embed sub-components.
-func BuildTweetComponents(tweet *model.Tweet, ref model.EmbedRef, text, footerOverride string) []discord.ContainerSubComponent {
+// If quoteText is non-empty, it replaces the original quoted tweet text.
+func BuildTweetComponents(tweet *model.Tweet, ref model.EmbedRef, text, quoteText, footerOverride string) []discord.ContainerSubComponent {
 	components := []discord.ContainerSubComponent{
 		discord.NewSection(
 			discord.NewTextDisplay(fmt.Sprintf("**%s** [@%s](https://x.com/%s)", tweet.Author.Name, tweet.Author.ScreenName, tweet.Author.ScreenName)),
@@ -53,8 +55,12 @@ func BuildTweetComponents(tweet *model.Tweet, ref model.EmbedRef, text, footerOv
 			discord.NewTextDisplay(fmt.Sprintf("%s 引用", emojiRepost)),
 			discord.NewTextDisplay(fmt.Sprintf("**%s** @%s", tweet.Quote.Author.Name, tweet.Quote.Author.ScreenName)),
 		)
-		if tweet.Quote.Text != "" {
-			components = append(components, discord.NewTextDisplay(tweet.Quote.Text))
+		displayQuoteText := tweet.Quote.Text
+		if quoteText != "" {
+			displayQuoteText = quoteText
+		}
+		if displayQuoteText != "" {
+			components = append(components, discord.NewTextDisplay(displayQuoteText))
 		}
 		if len(tweet.Quote.Media) > 0 {
 			items := make([]discord.MediaGalleryItem, 0, len(tweet.Quote.Media))
@@ -108,6 +114,6 @@ func BuildTweetComponents(tweet *model.Tweet, ref model.EmbedRef, text, footerOv
 
 // BuildTweetEmbedOriginal builds the original tweet embed as layout components (for revert).
 func BuildTweetEmbedOriginal(tweet *model.Tweet, ref model.EmbedRef) []discord.LayoutComponent {
-	components := BuildTweetComponents(tweet, ref, tweet.Text, "")
+	components := BuildTweetComponents(tweet, ref, tweet.Text, "", "")
 	return []discord.LayoutComponent{discord.NewContainer(components...)}
 }
